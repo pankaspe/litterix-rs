@@ -185,7 +185,7 @@ pub fn Bio() -> impl IntoView {
 
                 <div class="card">
                     <h3>
-                        <TypingText text="Interessi" speed_ms=15 delay_ms=(skills_delay + 200) />
+                        <TypingText text="Interessi" speed_ms=15 delay_ms=skills_delay + 200 />
                     </h3>
                     <ul>
                         {BIO.interests.iter().enumerate()
