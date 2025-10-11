@@ -3,7 +3,8 @@ use leptos::prelude::*;
 
 mod components;
 
-use components::Counter;
+use components::Bio;
+use components::Gallery;
 
 fn main() {
     mount_to_body(App);
@@ -12,8 +13,13 @@ fn main() {
 #[component]
 fn App() -> impl IntoView {
     view! {
-        <div>
-            <Counter />
+        <div class="main">
+            <div class="left-panel">
+                <Bio />
+            </div>
+            <div class="right-panel">
+                <Gallery />
+            </div>
         </div>
     }
 }
