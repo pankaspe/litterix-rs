@@ -1,7 +1,7 @@
 pub mod bio;
-pub mod counter;
 pub mod gallery;
+pub mod topbar;
 
 pub use bio::Bio;
-// pub use counter::Counter;
 pub use gallery::Gallery;
+pub use topbar::Topbar;

@@ -143,3 +143,17 @@ h6 {
 p {
     margin-bottom: 12px;
 }
+
+/* Topbar */
+.topbar {
+    height: 3rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
