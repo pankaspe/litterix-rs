@@ -6,7 +6,7 @@ pub fn Counter() -> impl IntoView {
 
     view! {
         <button
-            on:click=move |_| set_count.set(3)
+            on:click=move |_| set_count.update(|n| *n += 1)
         >
             "Click me: "
             {count}
