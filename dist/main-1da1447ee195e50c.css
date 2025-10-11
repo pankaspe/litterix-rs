@@ -17,10 +17,7 @@
 }
 
 body {
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -124,8 +121,6 @@ button:active {
 /* Card/Panel styling */
 .card {
     background: var(--bg-tertiary);
-    border: 1px solid var(--border);
-    border-radius: 4px;
     padding: 16px;
     margin-bottom: 16px;
 }
