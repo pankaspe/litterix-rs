@@ -12,7 +12,7 @@
     display: flex;
     flex-direction: column;
     gap: 2.5rem; /* Spaziatura tra le sezioni di testo */
-    padding: 5rem 0;
+    padding: 4rem 0;
 
     /* Ottimizzazione per la lettura: limita la larghezza del testo */
     max-width: 800px;

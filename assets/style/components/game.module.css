@@ -15,8 +15,8 @@
 .game-tabs {
     display: flex;
     justify-content: center; /* Centra i tab orizzontalmente */
-    margin-bottom: 2rem;
-    padding: 0.3rem; /* Aggiungiamo un po' di padding per distanziare il contenuto interno */
+    margin-bottom: 4rem;
+    padding: 0.2rem; /* Aggiungiamo un po' di padding per distanziare il contenuto interno */
 }
 
 /*

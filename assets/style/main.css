@@ -25,6 +25,8 @@
     --transition-speed: 0.125s;
 
     --color-warning: #ffc107;
+
+    --color-accent: #38bdf8;
 }
 
 * {

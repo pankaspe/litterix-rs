@@ -1,0 +1,22 @@
+/* ==========================================================================
+   Page: Homepage (Minimal Redesign)
+   ========================================================================== */
+
+/*
+  Il layout principale della home.
+  Usa flexbox per creare una spaziatura verticale pulita tra la tagline e il gioco.
+*/
+.home {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem; /* Spazio tra la tagline e i tab del gioco */
+    padding: 4rem 0; /* Aumentiamo il padding verticale per dare più respiro */
+}
+
+.home__title {
+    font-family: var(--font-family-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-text);
+}

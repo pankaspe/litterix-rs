@@ -1,97 +1,50 @@
 /* ================================
-   Rush Mode Style
+   Rush Mode Style (Redesigned Header)
 ================================ */
 
 .rush-mode {
-    width: 100%; /* NUOVO: Assicurati che occupi tutto lo spazio del genitore */
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    padding: 0; /* Rimuoviamo il padding che potrebbe interferire */
 }
 
+/*
+  Header principale per la Rush Mode.
+  Speculare a quello della Zen Mode: verticale e centrato.
+*/
 .rush-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: center; /* Centra orizzontalmente */
+    gap: 1rem; /* Spazio verticale tra icona, titolo e descrizione */
+    text-align: center; /* Centra il testo all'interno degli elementi */
+
+    border-bottom: none; /* Rimuoviamo il bordo per un look più pulito */
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-surface);
+}
+
+/* Stile per l'icona SVG */
+.rush-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(
+        --color-error
+    ); /* Usiamo il colore 'error' per un senso di urgenza */
+    stroke-width: 1.5;
 }
 
 .rush-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-family: var(--font-family-mono);
     color: var(--color-text);
     font-weight: 500;
 }
 
-.rush-badge {
-    background: rgba(220, 38, 38, 0.1); /* Sfondo rosso tenue */
-    color: var(
-        --color-error
-    ); /* Testo rosso, da definire nelle variabili globali */
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-family: var(--font-family-mono);
-    font-size: 0.85rem;
-}
-
-/* Area dove appare il TypingEngine o il Game Over */
-.rush-typing-area {
-    min-height: 200px; /* Altezza minima per evitare salti di layout */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.rush-game-over {
-    text-align: center;
-    font-family: var(--font-family-sans);
-    color: var(--color-subtle-text);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.rush-game-over h3 {
-    font-size: 2rem;
-    color: var(--color-error);
-    font-family: var(--font-family-mono);
-}
-
-.rush-final-stats p {
-    margin: 0.5rem 0;
-    font-size: 1.1rem;
-}
-
-.rush-final-stats strong {
-    color: var(--color-text);
-}
-
-.rush-play-again-button {
-    background-color: var(--color-primary);
-    color: var(--color-base);
-    border: none;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    align-self: center;
-}
-
-.rush-play-again-button:hover {
-    background-color: #ff6f2c; /* Scurisce leggermente il primario in hover */
-}
-
-.rush-mode .metrics-bar__stat--timer .metrics-bar__value {
-    /* 1. Applica il nuovo colore */
-    color: var(--color-warning);
-
-    /* 2. Applica l'animazione che abbiamo definito */
-    animation-name: pulse-timer;
-    animation-duration: 2s; /* Durata di un singolo ciclo di pulsazione */
-    animation-iteration-count: infinite; /* Ripeti all'infinito */
-    animation-timing-function: ease-in-out; /* Rendi il battito più naturale */
+.rush-description {
+    font-size: 0.95rem;
+    font-family: var(--font-family-base);
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    max-width: 450px;
 }

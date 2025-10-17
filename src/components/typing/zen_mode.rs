@@ -64,9 +64,16 @@ pub fn ZenMode() -> impl IntoView {
 
     view! {
         <div class="zen-mode">
-            <div class="zen-header">
-                <h2 class="zen-title">"Zen Mode"</h2>
-            </div>
+
+        <div class="zen-header">
+            <span class="zen-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-pinwheel-icon lucide-loader-pinwheel"><path d="M22 12a1 1 0 0 1-10 0 1 1 0 0 0-10 0"/><path d="M7 20.7a1 1 0 1 1 5-8.7 1 1 0 1 0 5-8.6"/><path d="M7 3.3a1 1 0 1 1 5 8.6 1 1 0 1 0 5 8.6"/><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+            <h2 class="zen-title">"Zen"</h2>
+            <p class="zen-description">
+                "Trova il tuo flow. Una frase dopo l'altra, al tuo passo. L'unica sfida è la tua concentrazione."
+            </p>
+        </div>
 
             <MetricsBar
                 wpm=Signal::derive(move || last_wpm.get())

@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: column;
     gap: 3rem; /* Spazio tra la tagline e i tab del gioco */
-    padding: 5rem 0; /* Aumentiamo il padding verticale per dare più respiro */
+    padding: 4rem 0; /* Aumentiamo il padding verticale per dare più respiro */
 }
 
 .home__title {

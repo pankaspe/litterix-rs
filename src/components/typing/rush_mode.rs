@@ -115,9 +115,17 @@ pub fn RushMode() -> impl IntoView {
     // --- Render Logic ---
     view! {
         <div class="rush-mode">
+
             <div class="rush-header">
-                <h2 class="rush-title">"Rush Mode"</h2>
+                <span class="rush-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge-icon lucide-gauge"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                </span>
+                <h2 class="rush-title">"Rush"</h2>
+                <p class="rush-description">
+                    "Una corsa contro il tempo. L'accuratezza è la chiave per guadagnare secondi preziosi."
+                </p>
             </div>
+
 
             <MetricsBar
                 wpm=Signal::derive(move || last_wpm.get())
