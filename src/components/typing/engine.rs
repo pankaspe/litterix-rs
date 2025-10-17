@@ -123,6 +123,9 @@ impl TypingState {
 pub fn TypingEngine(
     text: String,
     #[prop(optional)] on_complete: Option<Callback<(f64, f64)>>,
+    #[prop(optional)] on_char_typed: Option<Callback<()>>,
+    #[prop(optional)] on_word_typed: Option<Callback<()>>,
+    #[prop(optional)] on_word_deleted: Option<Callback<()>>,
 ) -> impl IntoView {
     let (state, set_state) = signal(TypingState::new(text.clone()));
     let input_ref = NodeRef::<Input>::new();
@@ -139,35 +142,103 @@ pub fn TypingEngine(
     let handle_input = move |_| {
         if let Some(input) = input_ref.get() {
             let value = input.value();
-            if !value.is_empty() {
-                let last_char = value.chars().last().unwrap();
-                set_state.update(|s| {
-                    s.handle_key(&last_char.to_string());
-                    if s.is_complete {
-                        if let Some(callback) = on_complete {
-                            if let Some(wpm) = s.get_wpm() {
-                                let accuracy = s.get_accuracy();
-                                callback.run((wpm, accuracy));
-                            }
+            if value.is_empty() {
+                return;
+            }
+
+            let last_char = value.chars().last().unwrap();
+
+            set_state.update(|s| {
+                // Ignora gli spazi iniziali se l'utente non ha ancora iniziato
+                if s.current_index == 0 && last_char == ' ' {
+                    return;
+                }
+
+                // Processa il carattere e aggiorna lo stato (indici e status dei caratteri)
+                s.handle_key(&last_char.to_string());
+
+                // Emetti sempre l'evento on_char_typed
+                if let Some(callback) = on_char_typed {
+                    callback.run(());
+                }
+
+                // --- LOGICA DI CONTEGGIO PAROLE RIVISTA E CORRETTA ---
+
+                // L'indice del carattere appena processato è `s.current_index - 1`.
+                // Dobbiamo assicurarci che l'indice sia valido.
+                if s.current_index > 0 {
+                    let processed_char_index = s.current_index - 1;
+
+                    // Prendiamo il carattere dal testo originale di riferimento
+                    let text_char = s.text.chars().nth(processed_char_index).unwrap();
+
+                    // Prendiamo lo stato del carattere appena digitato
+                    let char_status = &s.char_statuses[processed_char_index];
+
+                    // CONDIZIONE CHIAVE:
+                    // Incrementa il contatore delle parole solo se il carattere nel testo
+                    // era uno spazio E l'utente lo ha digitato correttamente.
+                    if text_char == ' ' && *char_status == CharStatus::Correct {
+                        if let Some(callback) = on_word_typed {
+                            callback.run(());
                         }
                     }
-                });
-                input.set_value("");
-            }
+                }
+
+                // --- GESTIONE COMPLETAMENTO FRASE ---
+                if s.is_complete {
+                    // Se la frase è finita, dobbiamo contare l'ultima parola
+                    // solo se la frase NON termina con uno spazio (altrimenti
+                    // sarebbe già stata contata dalla logica qui sopra).
+                    if !s.text.ends_with(' ') {
+                        if let Some(callback) = on_word_typed {
+                            callback.run(());
+                        }
+                    }
+
+                    // Emetti l'evento on_complete
+                    if let Some(callback) = on_complete {
+                        if let Some(wpm) = s.get_wpm() {
+                            let accuracy = s.get_accuracy();
+                            callback.run((wpm, accuracy));
+                        }
+                    }
+                }
+            });
+
+            // Svuota sempre l'input dopo averlo processato
+            input.set_value("");
         }
     };
 
     let handle_keydown = move |ev: KeyboardEvent| {
-        if ev.repeat() {
-            ev.prevent_default();
-            return;
-        }
-
         if ev.key() == "Backspace" {
             ev.prevent_default();
             set_state.update(|s| {
+                // --- NUOVA LOGICA PER DECREMENTARE IL CONTEGGIO ---
+                // Prima di eseguire il backspace, controlliamo cosa stiamo per cancellare.
+                if s.current_index > 0 {
+                    let index_to_delete = s.current_index - 1;
+                    let char_to_delete = s.text.chars().nth(index_to_delete).unwrap();
+                    let status_of_char = &s.char_statuses[index_to_delete];
+
+                    // Se stiamo cancellando uno SPAZIO che era stato digitato CORRETTAMENTE,
+                    // significa che stiamo "disfacendo" il completamento di una parola.
+                    if char_to_delete == ' ' && *status_of_char == CharStatus::Correct {
+                        if let Some(callback) = on_word_deleted {
+                            callback.run(());
+                        }
+                    }
+                }
+
+                // Ora eseguiamo l'azione di backspace vera e propria
                 s.handle_backspace();
             });
+        }
+
+        if ev.repeat() {
+            ev.prevent_default();
+            return;
         }
     };
 

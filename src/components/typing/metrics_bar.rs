@@ -6,6 +6,8 @@ use leptos::prelude::*;
 pub fn MetricsBar(
     wpm: Signal<f64>,
     accuracy: Signal<f64>,
+    chars_typed: Signal<usize>,
+    words_typed: Signal<usize>,
     current_phrase: Signal<usize>,
     total_phrases: usize,
 ) -> impl IntoView {
@@ -29,6 +31,20 @@ pub fn MetricsBar(
                 <div class="metrics-bar__label">"Accuracy"</div>
                 <div class="metrics-bar__value">
                     {move || format!("{:.1}%", accuracy.get())}
+                </div>
+            </div>
+
+            <div class="metrics-bar__stat">
+                <div class="metrics-bar__label">"Caratteri"</div>
+                <div class="metrics-bar__value">
+                    {move || chars_typed.get().to_string()}
+                </div>
+            </div>
+
+            <div class="metrics-bar__stat">
+                <div class="metrics-bar__label">"Parole"</div>
+                <div class="metrics-bar__value">
+                    {move || words_typed.get().to_string()}
                 </div>
             </div>
 
