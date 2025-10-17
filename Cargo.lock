@@ -762,13 +762,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos-portfolio"
-version = "0.1.0"
-dependencies = [
- "leptos",
-]
-
-[[package]]
 name = "leptos_config"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -838,6 +831,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "leptos_router"
+version = "0.8.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfd675546710e67855983437202e09b137ea60588dbb86e7fc0671f618577b73"
+dependencies = [
+ "any_spawner",
+ "either_of",
+ "futures",
+ "gloo-net",
+ "js-sys",
+ "leptos",
+ "leptos_router_macro",
+ "or_poisoned",
+ "reactive_graph",
+ "rustc_version",
+ "send_wrapper",
+ "tachys",
+ "thiserror 2.0.17",
+ "url",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "leptos_router_macro"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "571042420d79f4f5b6b0d149dc1561b03f47e08c37c8fa0dfc80c73ad67be8af"
+dependencies = [
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "leptos_server"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -874,6 +903,15 @@ name = "litemap"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "241eaef5fd12c88705a01fc1066c48c4b36e0dd4377dcdc7ec3942cea7a69956"
+
+[[package]]
+name = "litterix"
+version = "0.1.0"
+dependencies = [
+ "leptos",
+ "leptos_router",
+ "web-sys",
+]
 
 [[package]]
 name = "lock_api"
