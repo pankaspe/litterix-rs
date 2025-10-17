@@ -42,7 +42,6 @@ Engine  style
     display: flex;
     flex-wrap: wrap;
     gap: 0;
-    max-width: 900px;
     white-space: pre-wrap;
 }
 

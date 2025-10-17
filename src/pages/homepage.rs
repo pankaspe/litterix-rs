@@ -7,24 +7,15 @@ use leptos::prelude::*;
 pub fn Home() -> impl IntoView {
     view! {
         <main class="container home">
-            <div class="home__intro">
-                <div class="home__badge">
-                    <span>"🦀"</span>
-                    <span>"rust + wasm"</span>
-                </div>
 
-                <h1 class="home__title">
-                    <span class="home__title-highlight">"Litterix"</span>
-                </h1>
+            // Sostituiamo l'intero blocco 'home__intro' con una singola frase
+            <p class="home__tagline">
+                "Ritmo. Precisione. Velocità."
+            </p>
 
-                <p class="home__subtitle">
-                    "allenati, migliora la tua velocità, batti i tuoi record"
-                </p>
-            </div>
+            // Il componente Game ora è un figlio diretto del layout 'home'
+            <Game />
 
-            <div class="home__game">
-                <Game />
-            </div>
         </main>
     }
 }

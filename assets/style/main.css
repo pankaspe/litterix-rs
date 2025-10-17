@@ -23,6 +23,8 @@
     /* Layout */
     --border-radius: 8px;
     --transition-speed: 0.125s;
+
+    --color-warning: #ffc107;
 }
 
 * {

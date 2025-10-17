@@ -12,72 +12,55 @@ pub fn MetricsBar(
 ) -> impl IntoView {
     view! {
         <div class="metrics-bar">
-            // Metrica Timer (mostrata solo se presente)
-            {move || {
-                timer.map(|t| {
-                    view! {
-                        <div class="metrics-bar__stat metrics-bar__stat--timer">
-                            <div class="metrics-bar__label">"Tempo"</div>
-                            <div class="metrics-bar__value">
-                                {move || format!("{:.1}s", t.get())}
-                            </div>
-                        </div>
-                    }
-                })
-            }}
-
-            <div class="metrics-bar__stat">
-                <div class="metrics-bar__label">"WPM"</div>
-                <div class="metrics-bar__value">
-                    {move || {
-                        let w = wpm.get();
-                        if w > 0.0 {
-                            format!("{:.0}", w)
-                        } else {
-                            "-".to_string()
-                        }
-                    }}
+            // --- Gruppo Sinistro: Metriche di Performance ---
+            <div class="metrics-bar__group">
+                {move || timer.map(|t| view! {
+                    <div class="metrics-bar__stat metrics-bar__stat--timer">
+                        <div class="metrics-bar__label">"tempo"</div>
+                        <div class="metrics-bar__value">{move || format!("{:.1}", t.get())}</div>
+                    </div>
+                })}
+                <div class="metrics-bar__stat metrics-bar__stat--wpm">
+                    <div class="metrics-bar__label">"wpm"</div>
+                    <div class="metrics-bar__value">
+                        {move || if wpm.get() > 0.0 { format!("{:.0}", wpm.get()) } else { "-".to_string() }}
+                    </div>
+                </div>
+                <div class="metrics-bar__stat">
+                    <div class="metrics-bar__label">"acc"</div>
+                    <div class="metrics-bar__value">{move || format!("{:.1}%", accuracy.get())}</div>
                 </div>
             </div>
 
-            <div class="metrics-bar__stat">
-                <div class="metrics-bar__label">"Accuracy"</div>
-                <div class="metrics-bar__value">
-                    {move || format!("{:.1}%", accuracy.get())}
+            // --- Gruppo Destro: Metriche di Progresso ---
+            <div class="metrics-bar__group">
+                <div class="metrics-bar__stat">
+                    <div class="metrics-bar__label">"caratteri"</div>
+                    <div class="metrics-bar__value">{move || chars_typed.get().to_string()}</div>
                 </div>
-            </div>
-
-            // --- REINSERITO IL BLOCCO MANCANTE ---
-            <div class="metrics-bar__stat">
-                <div class="metrics-bar__label">"Caratteri"</div>
-                <div class="metrics-bar__value">
-                    {move || chars_typed.get().to_string()}
+                <div class="metrics-bar__stat">
+                    <div class="metrics-bar__label">"parole"</div>
+                    <div class="metrics-bar__value">{move || words_typed.get().to_string()}</div>
                 </div>
-            </div>
-            // --- FINE BLOCCO REINSERITO ---
-
-            <div class="metrics-bar__stat">
-                <div class="metrics-bar__label">"Parole"</div>
-                <div class="metrics-bar__value">
-                    {move || words_typed.get().to_string()}
-                </div>
-            </div>
-
-            // Metrica Frase (mostrata solo se presente)
-            {move || {
-                if let (Some(current), Some(total)) = (current_phrase, total_phrases) {
-                    Some(view! {
+                {move || {
+                    // Logica per mostrare la frase:
+                    // 1. Deve esistere un 'current_phrase'
+                    // 2. Se esiste anche 'total_phrases', mostra "X/Y"
+                    // 3. Altrimenti, mostra solo "X"
+                    current_phrase.map(|current| view! {
                         <div class="metrics-bar__stat">
-                            <div class="metrics-bar__label">"Frase"</div>
+                            <div class="metrics-bar__label">"frase"</div>
                             <div class="metrics-bar__value">
-                                {move || format!("{}/{}", current.get(), total)}
+                                {move || if let Some(total) = total_phrases {
+                                    format!("{}/{}", current.get(), total)
+                                } else {
+                                    current.get().to_string()
+                                }}
                             </div>
                         </div>
                     })
-                } else {
-                    None
-                }
-            }}
+                }}
+            </div>
         </div>
     }
 }

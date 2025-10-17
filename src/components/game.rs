@@ -32,24 +32,24 @@ pub fn Game() -> impl IntoView {
         <div class="game-container">
             // --- Selettore a Tab ---
             <div class="game-tabs">
-                <a
-                    href="#zen"
-                    class="game-tab"
-                    // Applica la classe 'active' dinamicamente
-                    class:active=move || active_mode.get() == GameMode::Zen
-                    // Al click, aggiorna il nostro signal
-                    on:click=move |_| set_active_mode.set(GameMode::Zen)
-                >
-                    "Zen Mode"
-                </a>
-                <a
-                    href="#rush"
-                    class="game-tab"
-                    class:active=move || active_mode.get() == GameMode::Rush
-                    on:click=move |_| set_active_mode.set(GameMode::Rush)
-                >
-                    "Rush Mode"
-                </a>
+                <div class="game-tabs__inner-wrapper"> // Usiamo la nuova classe per lo sfondo
+                    <a
+                        href="#zen"
+                        class="game-tab"
+                        class:active=move || active_mode.get() == GameMode::Zen
+                        on:click=move |_| set_active_mode.set(GameMode::Zen)
+                    >
+                        "Zen Mode"
+                    </a>
+                    <a
+                        href="#rush"
+                        class="game-tab"
+                        class:active=move || active_mode.get() == GameMode::Rush
+                        on:click=move |_| set_active_mode.set(GameMode::Rush)
+                    >
+                        "Rush Mode"
+                    </a>
+                </div>
             </div>
 
             // --- Area di Gioco ---

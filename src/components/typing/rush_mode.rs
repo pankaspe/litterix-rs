@@ -117,9 +117,6 @@ pub fn RushMode() -> impl IntoView {
         <div class="rush-mode">
             <div class="rush-header">
                 <h2 class="rush-title">"Rush Mode"</h2>
-                <span class="rush-badge">
-                    {move || format!("Ondata {}", phrase_index.get() + 1)}
-                </span>
             </div>
 
             <MetricsBar

@@ -3,12 +3,11 @@
 ================================ */
 
 .rush-mode {
+    width: 100%; /* NUOVO: Assicurati che occupi tutto lo spazio del genitore */
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2rem 0;
+    padding: 0; /* Rimuoviamo il padding che potrebbe interferire */
 }
 
 .rush-header {
@@ -84,4 +83,15 @@
 
 .rush-play-again-button:hover {
     background-color: #ff6f2c; /* Scurisce leggermente il primario in hover */
+}
+
+.rush-mode .metrics-bar__stat--timer .metrics-bar__value {
+    /* 1. Applica il nuovo colore */
+    color: var(--color-warning);
+
+    /* 2. Applica l'animazione che abbiamo definito */
+    animation-name: pulse-timer;
+    animation-duration: 2s; /* Durata di un singolo ciclo di pulsazione */
+    animation-iteration-count: infinite; /* Ripeti all'infinito */
+    animation-timing-function: ease-in-out; /* Rendi il battito più naturale */
 }

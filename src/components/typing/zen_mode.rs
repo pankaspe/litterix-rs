@@ -66,9 +66,6 @@ pub fn ZenMode() -> impl IntoView {
         <div class="zen-mode">
             <div class="zen-header">
                 <h2 class="zen-title">"Zen Mode"</h2>
-                <span class="zen-badge">
-                    {move || format!("Frase {}/{}", phrase_index.get() + 1, ZEN_PHRASES.len())}
-                </span>
             </div>
 
             <MetricsBar
@@ -77,7 +74,6 @@ pub fn ZenMode() -> impl IntoView {
                 chars_typed=Signal::derive(move || chars_typed.get())
                 words_typed=Signal::derive(move || words_typed.get())
                 current_phrase=Signal::derive(move || phrase_index.get() + 1)
-                total_phrases=ZEN_PHRASES.len()
             />
 
             {move || {

@@ -1,83 +1,59 @@
-.project {
-    padding: 3rem 0;
-    max-width: 900px;
-    margin: 0 auto;
-}
+/* ==========================================================================
+   Page: Project (Minimal Redesign)
+   ========================================================================== */
 
-.hero {
+/*
+  Layout principale della pagina Progetto.
+  Speculare a `.home` per coerenza visiva e di spaziatura.
+  Aggiungiamo un `max-width` e `margin: auto` per ottimizzare la
+  leggibilità del testo su schermi larghi.
+*/
+.project {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 2.5rem; /* Spaziatura tra le sezioni di testo */
+    padding: 5rem 0;
+
+    /* Ottimizzazione per la lettura: limita la larghezza del testo */
+    max-width: 800px;
+    margin: 0 auto; /* Centra la colonna di testo all'interno del .container */
 }
 
-.hero__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(247, 76, 0, 0.1);
+.project__title {
+    font-family: var(--font-family-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-text);
+}
+
+.project__highlight {
     color: var(--color-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+}
+
+.project__description {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    text-align: center;
+    border-bottom: 1px solid var(--color-surface);
+    padding-bottom: 2.5rem;
+}
+
+.project__section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.project__section-title {
+    font-size: 1.2rem;
     font-weight: 500;
-    font-size: 0.9rem;
-    width: fit-content;
+    color: var(--color-text);
     font-family: var(--font-family-mono);
 }
 
-.hero__title {
-    font-size: 3rem;
-    font-weight: 300;
-    color: var(--color-text);
-    letter-spacing: -0.02em;
-}
-
-.hero__title-highlight {
-    color: var(--color-primary);
-    font-weight: 500;
-}
-
-.hero__description {
-    color: var(--color-text-muted);
-    line-height: 1.8;
-    font-size: 1.1rem;
-}
-
-.hero__description strong {
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.hero__description em {
-    color: var(--color-primary);
-    font-style: normal;
-}
-
-.about-section {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--color-surface);
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--color-text);
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.01em;
-}
-
-.about-section p {
-    color: var(--color-text-muted);
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-}
-
-.about-section p strong {
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.stack-list {
+.project__list {
     list-style: none;
     padding: 0;
     display: flex;
@@ -85,32 +61,14 @@
     gap: 1rem;
 }
 
-.stack-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
+.project__list li {
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--color-primary);
     color: var(--color-text-muted);
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
-.stack-list li::before {
-    content: "→";
-    color: var(--color-primary);
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.stack-list strong {
+.project__list strong {
     color: var(--color-text);
     font-weight: 500;
-}
-
-@media (max-width: 768px) {
-    .hero__title {
-        font-size: 2rem;
-    }
-
-    .hero__description {
-        font-size: 1rem;
-    }
 }

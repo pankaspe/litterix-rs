@@ -1,47 +1,65 @@
 /* ================================
-   Metrics Bar Style
+   Metrics Bar Style (Redesigned)
 ================================ */
 
 .metrics-bar {
+    /* Rimuoviamo completamente lo sfondo e il padding */
+    background: none;
+    padding: 0;
+    margin-bottom: 2rem; /* Manteniamo lo spazio dal typing engine */
+
+    /* Nuovo layout: distribuisce i gruppi di metriche ai lati */
     display: flex;
-    justify-content: center;
-    gap: 3rem;
-    padding: 1.5rem 2rem;
-    background: var(--color-bg-secondary);
-    border-radius: 8px;
+    justify-content: space-between; /* MAGIA: spinge i gruppi agli estremi */
+    align-items: center;
     font-family: var(--font-family-mono);
-    margin-bottom: 2rem;
+}
+
+/* Un gruppo di metriche (es. WPM, Accuracy) */
+.metrics-bar__group {
+    display: flex;
+    gap: 2rem; /* Spazio tra le singole metriche */
 }
 
 .metrics-bar__stat {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+    /* Mettiamo etichetta e valore sulla stessa linea, ma invertiti */
+    flex-direction: row-reverse;
+    align-items: baseline; /* Allinea le baseline del testo per un look pulito */
+    gap: 0.75rem;
 }
 
 .metrics-bar__label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-text-muted);
+    font-size: 0.8rem; /* Leggermente più grande per leggibilità */
+    color: var(--color-subtle-text); /* Meno invadente del text-muted */
+    text-transform: none; /* Più pulito del tutto maiuscolo */
+    letter-spacing: 0;
 }
 
 .metrics-bar__value {
-    font-size: 1.5rem;
-    color: var(--color-primary);
-    font-weight: 600;
-    min-width: 60px;
-    text-align: center;
+    font-size: 1.4rem; /* Leggermente più piccolo, ma ancora d'impatto */
+    color: var(--color-text); /* Colore del testo normale, non primario */
+    font-weight: 500;
+    min-width: 0; /* Rimuoviamo la larghezza minima */
+    text-align: left;
+    transition: color 0.2s ease;
+}
+
+/* Evidenziamo il valore del timer e del WPM per dare loro importanza */
+.metrics-bar__stat--timer .metrics-bar__value,
+.metrics-bar__stat--wpm .metrics-bar__value {
+    color: var(--color-primary); /* Il colore primario ora è un highlight */
+    font-weight: bold;
 }
 
 @media (max-width: 768px) {
     .metrics-bar {
-        gap: 1.5rem;
-        padding: 1rem 1.5rem;
+        flex-direction: column; /* In pila su schermi piccoli */
+        align-items: center;
+        gap: 1rem;
     }
 
-    .metrics-bar__value {
-        font-size: 1.2rem;
+    .metrics-bar__group {
+        gap: 1.5rem;
     }
 }
