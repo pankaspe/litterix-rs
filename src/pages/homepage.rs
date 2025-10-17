@@ -80,7 +80,7 @@ pub fn Home() -> impl IntoView {
                 </div>
 
                 <h1 class="home__title">
-                    <span class="home__title-highlight">"litterix"</span>
+                    <span class="home__title-highlight">"Litterix"</span>
                 </h1>
 
                 <p class="home__subtitle">

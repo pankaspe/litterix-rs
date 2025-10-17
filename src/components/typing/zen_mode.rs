@@ -75,9 +75,9 @@ pub fn ZenMode() -> impl IntoView {
 
         <div class="zen-mode">
             <div class="zen-header">
-                <h2 class="zen-title">"zen mode"</h2>
+                <h2 class="zen-title">"Zen mode"</h2>
                 <span class="zen-badge">
-                    {move || format!("phrase {}", phrase_index.get() + 1)}
+                    {move || format!("Frase {}", phrase_index.get() + 1)}
                 </span>
             </div>
 
