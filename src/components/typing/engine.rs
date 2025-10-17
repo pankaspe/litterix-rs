@@ -1,3 +1,5 @@
+// src/components/typing/engine.rs
+//
 use leptos::ev::KeyboardEvent;
 use leptos::html::Input;
 use leptos::prelude::*;
@@ -40,7 +42,6 @@ impl TypingState {
             return false;
         }
 
-        // Avvia il timer al primo carattere
         if !self.started {
             self.started = true;
             if let Some(win) = window() {
@@ -59,7 +60,6 @@ impl TypingState {
         let expected_char = chars[self.current_index];
         let input_char = key.chars().next().unwrap_or('\0');
 
-        // Segna corretto o errato
         if input_char == expected_char {
             self.char_statuses[self.current_index] = CharStatus::Correct;
         } else {
@@ -68,7 +68,6 @@ impl TypingState {
 
         self.current_index += 1;
 
-        // Fine testo
         if self.current_index >= chars.len() {
             self.is_complete = true;
             if let Some(win) = window() {
@@ -149,7 +148,6 @@ pub fn TypingEngine(
         }
     });
 
-    // ✅ Usa `on:input` per gestire correttamente anche le lettere accentate
     let handle_input = move |_| {
         if let Some(input) = input_ref.get() {
             let value = input.value();
@@ -200,153 +198,6 @@ pub fn TypingEngine(
     };
 
     view! {
-    <style>
-        {r#"
-.typing-engine {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.typing-display {
-    font-family: var(--font-family-mono);
-    font-size: 1.5rem;
-    line-height: 2;
-    letter-spacing: 0.05em;
-    padding: 2rem;
-    background: var(--color-bg-secondary);
-    border-radius: 8px;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    cursor: text;
-    user-select: none;
-}
-
-.typing-input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.typing-display:focus-within {
-    outline: none;
-}
-
-.typing-text {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    max-width: 900px;
-    white-space: pre-wrap;
-}
-
-.typing-char {
-    position: relative;
-    transition: color 0.05s;
-}
-
-.typing-char--pending {
-    color: var(--color-text-muted);
-}
-
-.typing-char--correct {
-    color: var(--color-text);
-}
-
-.typing-char--incorrect {
-    color: var(--color-error);
-}
-
-.typing-char--current::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2px;
-    height: 1.5em;
-    background: var(--color-primary);
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
-
-.typing-stats {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    font-family: var(--font-family-mono);
-    color: var(--color-text-muted);
-}
-
-.typing-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.typing-stat__value {
-    font-size: 2rem;
-    color: var(--color-primary);
-    font-weight: 600;
-}
-
-.typing-stat__label {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.typing-actions {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.typing-btn {
-    padding: 0.75rem 1.5rem;
-    background: transparent;
-    color: var(--color-text-muted);
-    border: 2px solid var(--color-text-muted);
-    border-radius: 8px;
-    font-family: var(--font-family-mono);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.125s;
-}
-
-.typing-btn:hover {
-    color: var(--color-primary);
-    border-color: var(--color-primary);
-}
-
-@media (max-width: 768px) {
-    .typing-display {
-        font-size: 1.2rem;
-        padding: 1.5rem;
-    }
-
-    .typing-stats {
-        gap: 1.5rem;
-    }
-
-    .typing-stat__value {
-        font-size: 1.5rem;
-    }
-}
-            "#}
-    </style>
-
     <div class="typing-engine">
                 <div class="typing-display" on:click=handle_click>
                     <input

@@ -1,3 +1,5 @@
+// src/pages/mod.rs
+//
 pub mod homepage;
 pub mod project;
 

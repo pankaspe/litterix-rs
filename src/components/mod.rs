@@ -1,3 +1,5 @@
+// src/components/mod.rs
+//
 pub mod navbar;
 pub mod typing;
 

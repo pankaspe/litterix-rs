@@ -1,3 +1,5 @@
+// src/main.rs
+//
 use leptos::mount::mount_to_body;
 
 mod app;

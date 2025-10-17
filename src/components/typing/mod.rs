@@ -1,3 +1,5 @@
+// src/components/typing/mod.rs
+//
 pub mod engine;
 pub mod zen_mode;
 

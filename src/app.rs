@@ -1,3 +1,5 @@
+// src/app.rs
+//
 use crate::components::Navbar;
 use crate::pages::{Home, Project};
 use leptos::prelude::*;

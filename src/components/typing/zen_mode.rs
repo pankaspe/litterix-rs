@@ -1,3 +1,5 @@
+// src/components/typing/zen_mode.rs
+//
 use crate::components::typing::TypingEngine;
 use leptos::prelude::*;
 
@@ -36,43 +38,6 @@ pub fn ZenMode() -> impl IntoView {
     });
 
     view! {
-        <style>
-            {r#"
-.zen-mode {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2rem 0;
-}
-
-.zen-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-surface);
-}
-
-.zen-title {
-    font-size: 1.5rem;
-    font-family: var(--font-family-mono);
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.zen-badge {
-    background: rgba(247, 76, 0, 0.1);
-    color: var(--color-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-family: var(--font-family-mono);
-    font-size: 0.85rem;
-}
-            "#}
-        </style>
-
         <div class="zen-mode">
             <div class="zen-header">
                 <h2 class="zen-title">"Zen mode"</h2>
