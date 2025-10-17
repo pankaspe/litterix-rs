@@ -9,7 +9,7 @@ pub fn Home() -> impl IntoView {
         <main class="container home">
 
             // Sostituiamo l'intero blocco 'home__intro' con una singola frase
-            <p class="home__tagline">
+            <p class="home__title">
                 "Ritmo. Precisione. Velocità."
             </p>
 

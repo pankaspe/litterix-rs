@@ -13,14 +13,10 @@
     padding: 5rem 0; /* Aumentiamo il padding verticale per dare più respiro */
 }
 
-/*
-  Lo stile per la nostra nuova frase d'effetto.
-  È pensata per essere elegante e non invadente.
-*/
-.home__tagline {
+.home__title {
     font-family: var(--font-family-mono);
-    font-size: 1.1rem;
-    color: var(--color-subtle-text);
+    font-size: 1.5rem;
+    font-weight: 400;
     text-align: center;
-    letter-spacing: 0.05em;
+    color: var(--color-text);
 }
