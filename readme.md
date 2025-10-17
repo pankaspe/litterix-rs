@@ -32,15 +32,6 @@ L'applicazione offre due sfide distinte, alimentate dallo stesso motore di batti
 -   🚀 **Leptos**: Un framework reattivo all'avanguardia per costruire interfacce web interamente in Rust.
 -   🕸️ **WebAssembly (WASM)**: Per eseguire il codice Rust nel browser, eliminando la necessità di JavaScript e garantendo una fluidità impeccabile.
 
-## Roadmap
-
-Litterix è un progetto in continua evoluzione. Le prossime funzionalità includono:
-
--   [ ] Aggiunta autenticazione.
--   [ ] Implementazione di classifiche e statistiche utente.
--   [ ] Nuove modalità di gioco (es. "Quote Mode" con citazioni famose).
--   [ ] Miglioramento dell'accessibilità.
-
 ## Licenza
 
 Questo progetto è rilasciato sotto la [Licenza MIT](LICENSE).
