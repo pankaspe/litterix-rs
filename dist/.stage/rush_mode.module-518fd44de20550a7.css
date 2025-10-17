@@ -1,0 +1,87 @@
+/* ================================
+   Rush Mode Style
+================================ */
+
+.rush-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.rush-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-surface);
+}
+
+.rush-title {
+    font-size: 1.5rem;
+    font-family: var(--font-family-mono);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.rush-badge {
+    background: rgba(220, 38, 38, 0.1); /* Sfondo rosso tenue */
+    color: var(
+        --color-error
+    ); /* Testo rosso, da definire nelle variabili globali */
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: var(--font-family-mono);
+    font-size: 0.85rem;
+}
+
+/* Area dove appare il TypingEngine o il Game Over */
+.rush-typing-area {
+    min-height: 200px; /* Altezza minima per evitare salti di layout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rush-game-over {
+    text-align: center;
+    font-family: var(--font-family-sans);
+    color: var(--color-subtle-text);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rush-game-over h3 {
+    font-size: 2rem;
+    color: var(--color-error);
+    font-family: var(--font-family-mono);
+}
+
+.rush-final-stats p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.rush-final-stats strong {
+    color: var(--color-text);
+}
+
+.rush-play-again-button {
+    background-color: var(--color-primary);
+    color: var(--color-base);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: center;
+}
+
+.rush-play-again-button:hover {
+    background-color: #ff6f2c; /* Scurisce leggermente il primario in hover */
+}
