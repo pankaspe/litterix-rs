@@ -1,7 +1,20 @@
-/* ================================
-Engine  style
-================================ */
+/* ==========================================================================
+   Component: Typing Engine
+========================================================================== */
 
+/* Animazione per il cursore di battitura (caret) */
+@keyframes blink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Contenitore principale del motore di battitura */
 .typing-engine {
     width: 100%;
     display: flex;
@@ -9,14 +22,18 @@ Engine  style
     gap: 2rem;
 }
 
+/*
+  Il box principale che contiene il testo.
+  Include la logica di focus con un bordo sinistro che cambia colore.
+*/
 .typing-display {
     font-family: var(--font-family-mono);
     font-size: 1.5rem;
     line-height: 2;
     letter-spacing: 0.05em;
     padding: 2rem;
-    background: var(--color-bg-secondary);
-    border-radius: 8px;
+    background-color: rgb(from var(--color-bg-secondary) r g b / 0.2);
+    border-radius: var(--border-radius);
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -26,21 +43,33 @@ Engine  style
     position: relative;
     cursor: text;
     user-select: none;
+
+    /* Stato di default: bordo sinistro spento */
+    border-left: 2px solid var(--color-surface);
+
+    /* Transizione fluida per il cambio di colore del bordo */
+    transition: border-left-color 0.2s ease-in-out;
 }
 
+/* Stato di focus: cambia il colore del bordo sinistro */
+.typing-display:focus-within {
+    outline: none;
+    border-left-color: var(--color-primary);
+}
+
+/* Input nascosto che cattura la digitazione */
 .typing-input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
 }
 
-.typing-display:focus-within {
-    outline: none;
-}
+/* --- Stili del Testo --- */
 
 .typing-text {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0;
     white-space: pre-wrap;
 }
@@ -62,6 +91,7 @@ Engine  style
     color: var(--color-error);
 }
 
+/* Cursore di battitura (caret) */
 .typing-char--current::after {
     content: "";
     position: absolute;
@@ -74,16 +104,7 @@ Engine  style
     animation: blink 1s infinite;
 }
 
-@keyframes blink {
-    0%,
-    50% {
-        opacity: 1;
-    }
-    51%,
-    100% {
-        opacity: 0;
-    }
-}
+/* --- Sezioni Legacy (da rimuovere se non più in uso nel markup) --- */
 
 .typing-stats {
     display: flex;
@@ -134,6 +155,8 @@ Engine  style
     color: var(--color-primary);
     border-color: var(--color-primary);
 }
+
+/* --- Media Queries per la Responsività --- */
 
 @media (max-width: 768px) {
     .typing-display {
