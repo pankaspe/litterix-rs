@@ -1,6 +1,6 @@
 // src/pages/homepage.rs
 //
-use crate::components::{RushMode, ZenMode};
+use crate::components::Game;
 use leptos::prelude::*;
 
 #[component]
@@ -23,8 +23,7 @@ pub fn Home() -> impl IntoView {
             </div>
 
             <div class="home__game">
-                //<ZenMode />
-                <RushMode />
+                <Game />
             </div>
         </main>
     }
