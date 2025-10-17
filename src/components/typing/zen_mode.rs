@@ -1,9 +1,8 @@
 // src/components/typing/zen_mode.rs
 //
-use crate::components::typing::TypingEngine;
+use crate::components::typing::{MetricsBar, TypingEngine};
 use leptos::prelude::*;
 
-// Frasi hardcoded per testing
 const ZEN_PHRASES: &[&str] = &[
     "la velocità è nulla senza il controllo",
     "ogni errore è un maestro che insegna pazienza",
@@ -18,41 +17,61 @@ const ZEN_PHRASES: &[&str] = &[
 #[component]
 pub fn ZenMode() -> impl IntoView {
     let (phrase_index, set_phrase_index) = signal(0_usize);
-    let (key, set_key) = signal(0); // Chiave per forzare re-render
+    let (last_wpm, set_last_wpm) = signal(0.0);
+    let (last_accuracy, set_last_accuracy) = signal(100.0);
+    let (is_transitioning, set_is_transitioning) = signal(false);
 
-    let current_phrase = move || ZEN_PHRASES[phrase_index.get()].to_string();
+    // Genera la frase corrente in anticipo
+    let current_phrase = Memo::new(move |_| ZEN_PHRASES[phrase_index.get()].to_string());
 
     let on_complete = Callback::new(move |(wpm, accuracy): (f64, f64)| {
-        leptos::logging::log!("Completato! WPM: {:.0}, Accuracy: {:.1}%", wpm, accuracy);
+        set_last_wpm.set(wpm);
+        set_last_accuracy.set(accuracy);
+        set_is_transitioning.set(true);
 
-        // Passa alla frase successiva dopo un breve delay
+        // Transizione più fluida con delay maggiore
         set_timeout(
             move || {
                 set_phrase_index.update(|i| {
                     *i = (*i + 1) % ZEN_PHRASES.len();
                 });
-                set_key.update(|k| *k += 1);
+                set_is_transitioning.set(false);
             },
-            std::time::Duration::from_millis(1500),
+            std::time::Duration::from_millis(2000),
         );
     });
 
     view! {
         <div class="zen-mode">
             <div class="zen-header">
-                <h2 class="zen-title">"Zen mode"</h2>
+                <h2 class="zen-title">"Zen Mode"</h2>
                 <span class="zen-badge">
-                    {move || format!("Frase {}", phrase_index.get() + 1)}
+                    {move || format!("Frase {}/{}", phrase_index.get() + 1, ZEN_PHRASES.len())}
                 </span>
             </div>
 
+            <MetricsBar
+                wpm=Signal::derive(move || last_wpm.get())
+                accuracy=Signal::derive(move || last_accuracy.get())
+                current_phrase=Signal::derive(move || phrase_index.get() + 1)
+                total_phrases=ZEN_PHRASES.len()
+            />
+
             {move || {
-                let _ = key.get(); // Trigger re-render
-                view! {
-                    <TypingEngine
-                        text=current_phrase()
-                        on_complete=on_complete
-                    />
+                // Non mostrare nulla durante la transizione
+                if is_transitioning.get() {
+                    view! {
+                        <div class="typing-display" style="min-height: 200px; opacity: 0.3;">
+                            <div class="typing-text">"Caricamento prossima frase..."</div>
+                        </div>
+                    }.into_any()
+                } else {
+                    view! {
+                        <TypingEngine
+                            text=current_phrase.get()
+                            on_complete=on_complete
+                        />
+                    }.into_any()
                 }
             }}
         </div>

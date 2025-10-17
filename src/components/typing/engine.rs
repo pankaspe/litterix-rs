@@ -90,21 +90,9 @@ impl TypingState {
         }
     }
 
-    pub fn reset(&mut self, new_text: Option<String>) {
-        if let Some(text) = new_text {
-            let char_count = text.chars().count();
-            self.text = text;
-            self.char_statuses = vec![CharStatus::Pending; char_count];
-        } else {
-            let char_count = self.text.chars().count();
-            self.char_statuses = vec![CharStatus::Pending; char_count];
-        }
-        self.current_index = 0;
-        self.is_complete = false;
-        self.started = false;
-        self.start_time = None;
-        self.end_time = None;
-    }
+    // Metodo rimosso perché non utilizzato
+    // Se in futuro vorrai resettare lo stato, puoi ricreare l'istanza
+    // con TypingState::new(new_text)
 
     pub fn get_wpm(&self) -> Option<f64> {
         if let (Some(start), Some(end)) = (self.start_time, self.end_time) {
@@ -164,13 +152,12 @@ pub fn TypingEngine(
                         }
                     }
                 });
-                input.set_value(""); // svuota dopo ogni input
+                input.set_value("");
             }
         }
     };
 
     let handle_keydown = move |ev: KeyboardEvent| {
-        // Blocca l'autorepeat
         if ev.repeat() {
             ev.prevent_default();
             return;
@@ -190,78 +177,45 @@ pub fn TypingEngine(
         }
     };
 
-    let reset = move |_| {
-        set_state.update(|s| s.reset(None));
-        if let Some(input) = input_ref.get() {
-            let _ = input.focus();
-        }
-    };
-
     view! {
-    <div class="typing-engine">
-                <div class="typing-display" on:click=handle_click>
-                    <input
-                        node_ref=input_ref
-                        type="text"
-                        class="typing-input"
-                        on:input=handle_input
-                        on:keydown=handle_keydown
-                        autocomplete="off"
-                        autocapitalize="off"
-                        spellcheck="false"
-                    />
-                    <div class="typing-text">
-                        {move || {
-                            let s = state.get();
-                            let chars: Vec<char> = s.text.chars().collect();
-                            chars.into_iter().enumerate().map(|(i, ch)| {
-                                let status = &s.char_statuses[i];
-                                let is_current = i == s.current_index;
+        <div class="typing-engine">
+            <div class="typing-display" on:click=handle_click>
+                <input
+                    node_ref=input_ref
+                    type="text"
+                    class="typing-input"
+                    on:input=handle_input
+                    on:keydown=handle_keydown
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                />
+                <div class="typing-text">
+                    {move || {
+                        let s = state.get();
+                        let chars: Vec<char> = s.text.chars().collect();
+                        chars.into_iter().enumerate().map(|(i, ch)| {
+                            let status = &s.char_statuses[i];
+                            let is_current = i == s.current_index;
 
-                                let mut class = match status {
-                                    CharStatus::Pending => "typing-char typing-char--pending",
-                                    CharStatus::Correct => "typing-char typing-char--correct",
-                                    CharStatus::Incorrect => "typing-char typing-char--incorrect",
-                                }
-                                .to_string();
+                            let mut class = match status {
+                                CharStatus::Pending => "typing-char typing-char--pending",
+                                CharStatus::Correct => "typing-char typing-char--correct",
+                                CharStatus::Incorrect => "typing-char typing-char--incorrect",
+                            }
+                            .to_string();
 
-                                if is_current {
-                                    class.push_str(" typing-char--current");
-                                }
+                            if is_current {
+                                class.push_str(" typing-char--current");
+                            }
 
-                                let ch_display = if ch == ' ' { '\u{00A0}' } else { ch };
+                            let ch_display = if ch == ' ' { '\u{00A0}' } else { ch };
 
-                                view! { <span class=class>{ch_display}</span> }
-                            }).collect_view()
-                        }}
-                    </div>
+                            view! { <span class=class>{ch_display}</span> }
+                        }).collect_view()
+                    }}
                 </div>
-
-                {move || {
-                    let s = state.get();
-                    if s.is_complete {
-                        let wpm = s.get_wpm().unwrap_or(0.0);
-                        let accuracy = s.get_accuracy();
-
-                        view! {
-                            <div class="typing-stats">
-                                <div class="typing-stat">
-                                    <div class="typing-stat__value">{format!("{:.0}", wpm)}</div>
-                                    <div class="typing-stat__label">"wpm"</div>
-                                </div>
-                                <div class="typing-stat">
-                                    <div class="typing-stat__value">{format!("{:.1}%", accuracy)}</div>
-                                    <div class="typing-stat__label">"accuracy"</div>
-                                </div>
-                            </div>
-                            <div class="typing-actions">
-                                <button class="typing-btn" on:click=reset>"restart"</button>
-                            </div>
-                        }.into_any()
-                    } else {
-                        view! {}.into_any()
-                    }
-                }}
             </div>
-        }
+        </div>
+    }
 }
