@@ -18,7 +18,7 @@
 - **🧘 Zen Mode**: Un flusso continuo e infinito di frasi per allenare il ritmo e la precisione senza la pressione del tempo. Ideale per entrare nello stato di *flow* e migliorare la memoria muscolare.
 
 - **⏱️ Rush Mode**: Una corsa contro il tempo dove ogni secondo conta. Completa le frasi correttamente per guadagnare tempo prezioso. L'accuratezza ti premia con bonus temporali:
-  - 100% accuracy: +5 secondi
+  - >100% accuracy: +5 secondi
   - >75% accuracy: +3 secondi
   - >50% accuracy: +2 secondi
   - >25% accuracy: +1 secondo
@@ -79,76 +79,6 @@ Architettura pulita e disaccoppiata:
 
 ---
 
-## 🚀 Come Iniziare
-
-### Prerequisiti
-
-- [Rust](https://www.rust-lang.org/tools/install) (ultima versione stabile)
-- [Trunk](https://trunkrs.dev/): `cargo install trunk`
-- Target WASM: `rustup target add wasm32-unknown-unknown`
-
-### Installazione
-
-```bash
-# Clona il repository
-git clone https://github.com/tuousername/litterix.git
-cd litterix
-
-# Avvia il server di sviluppo
-trunk serve --open
-```
-
-L'applicazione sarà disponibile su `http://127.0.0.1:8080`
-
-### Build per Produzione
-
-```bash
-# Compila per produzione
-trunk build --release
-
-# I file ottimizzati saranno in ./dist/
-```
-
----
-
-## 📁 Struttura del Progetto
-
-```
-litterix/
-├── src/
-│   ├── app.rs                  # Configurazione routing e provider
-│   ├── main.rs                 # Entry point
-│   ├── settings_store.rs       # Gestione impostazioni e localStorage
-│   ├── components/
-│   │   ├── mod.rs
-│   │   ├── game.rs             # Componente principale del gioco
-│   │   ├── navbar.rs           # Barra di navigazione
-│   │   └── typing/
-│   │       ├── engine.rs       # Motore di battitura
-│   │       ├── metrics_bar.rs  # Barra metriche
-│   │       ├── zen_mode.rs     # Modalità Zen
-│   │       └── rush_mode.rs    # Modalità Rush
-│   └── pages/
-│       ├── homepage.rs         # Pagina principale
-│       ├── project.rs          # Pagina informazioni progetto
-│       └── settings.rs         # Pagina impostazioni
-├── assets/
-│   ├── datasets/               # Dataset frasi per difficoltà
-│   │   ├── base-dataset.json
-│   │   ├── intermedie-dataset.json
-│   │   └── advanced-dataset.json
-│   └── style/                  # CSS modulare
-│       ├── main.css
-│       ├── animations.css
-│       ├── components/
-│       └── pages/
-├── Cargo.toml
-├── index.html
-└── README.md
-```
-
----
-
 ## 🎯 Roadmap
 
 - [ ] **Temi personalizzabili**: Dark mode, light mode, e temi della community
@@ -161,36 +91,9 @@ litterix/
 
 ---
 
-## 🤝 Contribuire
-
-I contributi sono benvenuti! Se vuoi migliorare Litterix:
-
-1. Fai un fork del progetto
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Committa le modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Pusha il branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
-
-### Linee Guida
-
-- Mantieni lo stile del codice esistente
-- Aggiungi commenti dove necessario
-- Testa le modifiche prima di committare
-- Aggiorna la documentazione se necessario
-
----
-
 ## 📝 Licenza
 
 Questo progetto è rilasciato sotto la [Licenza MIT](LICENSE). Vedi il file `LICENSE` per i dettagli completi.
-
----
-
-## 👤 Autore
-
-**Andrea B.**
-
-- GitHub: [@tuousername](https://github.com/tuousername)
 
 ---
 
