@@ -1,0 +1,117 @@
+/* ================================
+   Rush Mode Style (Redesigned Header)
+================================ */
+
+.rush-mode {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/*
+  Header principale per la Rush Mode.
+  Speculare a quello della Zen Mode: verticale e centrato.
+*/
+.rush-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra orizzontalmente */
+    gap: 1rem; /* Spazio verticale tra icona, titolo e descrizione */
+    text-align: center; /* Centra il testo all'interno degli elementi */
+
+    border-bottom: none; /* Rimuoviamo il bordo per un look più pulito */
+    padding-bottom: 1rem;
+}
+
+/* Stile per l'icona SVG */
+.rush-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(
+        --color-error
+    ); /* Usiamo il colore 'error' per un senso di urgenza */
+    stroke-width: 1.5;
+}
+
+.rush-title {
+    font-size: 1.8rem;
+    font-family: var(--font-family-mono);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.rush-description {
+    font-size: 0.95rem;
+    font-family: var(--font-family-base);
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    max-width: 450px;
+}
+
+/* ================================
+   Game Over Screen
+================================ */
+
+.rush-game-over {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem 2rem;
+}
+
+.rush-game-over-title {
+    font-size: 1.5rem;
+    font-family: var(--font-family-mono);
+    color: var(--color-error);
+    font-weight: 400;
+}
+
+.rush-final-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+.rush-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-left: 2px solid var(--color-primary);
+}
+
+.rush-stat-label {
+    font-size: 1rem;
+    font-family: var(--font-family-base);
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.rush-stat-value {
+    font-size: 1.5rem;
+    font-family: var(--font-family-mono);
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+.rush-play-again-button {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-family: var(--font-family-mono);
+    font-weight: 400;
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.rush-play-again-button:hover {
+    color: var(--color-primary);
+    background: transparent;
+}

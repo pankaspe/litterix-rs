@@ -1,7 +1,6 @@
 /* ==========================================================================
    Component: Typing Engine
    ========================================================================== */
-
 /* Animazione per il cursore di battitura (caret) */
 @keyframes blink {
     0%,
@@ -13,7 +12,6 @@
         opacity: 0;
     }
 }
-
 /* Contenitore principale del motore di battitura */
 .typing-engine {
     width: 100%;
@@ -21,7 +19,6 @@
     flex-direction: column;
     gap: 2rem;
 }
-
 /*
   Il box principale che contiene il testo.
   Include la logica di focus con un bordo sinistro che cambia colore.
@@ -43,35 +40,34 @@
     position: relative;
     cursor: text;
     user-select: none;
-
     /* Stato di default: bordo sinistro spento */
     border-left: 2px solid var(--color-surface);
-
     /* Transizione fluida per il cambio di colore del bordo */
     transition: border-left-color 0.2s ease-in-out;
 }
-
 /* Stato di focus: cambia il colore del bordo sinistro */
 .typing-display:focus-within {
     outline: none;
     border-left-color: var(--color-primary);
 }
-
 /* Input nascosto che cattura la digitazione */
 .typing-input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
 }
-
 /* --- Stili del Testo --- */
-
 .typing-text {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0;
-    white-space: pre-wrap;
+}
+
+/* Ogni parola è un blocco inline che va a capo intero */
+.typing-word {
+    display: inline-block;
+    white-space: nowrap;
 }
 
 /*
@@ -82,19 +78,15 @@
     position: relative;
     transition: color 0.2s ease-in-out;
 }
-
 .typing-char--pending {
     color: var(--color-text-muted);
 }
-
 .typing-char--correct {
     color: var(--color-text);
 }
-
 .typing-char--incorrect {
     color: var(--color-error);
 }
-
 /* Cursore di battitura (caret) */
 .typing-char--current::after {
     content: "";
@@ -107,9 +99,7 @@
     background: var(--color-primary);
     animation: blink 1s infinite;
 }
-
 /* --- Sezioni Legacy (da rimuovere se non più in uso) --- */
-
 .typing-stats {
     display: flex;
     justify-content: center;
@@ -117,32 +107,27 @@
     font-family: var(--font-family-mono);
     color: var(--color-text-muted);
 }
-
 .typing-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
 }
-
 .typing-stat__value {
     font-size: 2rem;
     color: var(--color-primary);
     font-weight: 600;
 }
-
 .typing-stat__label {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
-
 .typing-actions {
     display: flex;
     justify-content: center;
     gap: 1rem;
 }
-
 .typing-btn {
     padding: 0.75rem 1.5rem;
     background: transparent;
@@ -154,24 +139,19 @@
     cursor: pointer;
     transition: all 0.125s;
 }
-
 .typing-btn:hover {
     color: var(--color-primary);
     border-color: var(--color-primary);
 }
-
 /* --- Media Queries per la Responsività --- */
-
 @media (max-width: 768px) {
     .typing-display {
         font-size: 1.2rem;
         padding: 1.5rem;
     }
-
     .typing-stats {
         gap: 1.5rem;
     }
-
     .typing-stat__value {
         font-size: 1.5rem;
     }

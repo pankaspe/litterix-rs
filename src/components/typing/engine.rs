@@ -90,10 +90,6 @@ impl TypingState {
         }
     }
 
-    // Metodo rimosso perché non utilizzato
-    // Se in futuro vorrai resettare lo stato, puoi ricreare l'istanza
-    // con TypingState::new(new_text)
-
     pub fn get_wpm(&self) -> Option<f64> {
         if let (Some(start), Some(end)) = (self.start_time, self.end_time) {
             let duration_ms = end - start;
@@ -149,35 +145,21 @@ pub fn TypingEngine(
             let last_char = value.chars().last().unwrap();
 
             set_state.update(|s| {
-                // Ignora gli spazi iniziali se l'utente non ha ancora iniziato
                 if s.current_index == 0 && last_char == ' ' {
                     return;
                 }
 
-                // Processa il carattere e aggiorna lo stato (indici e status dei caratteri)
                 s.handle_key(&last_char.to_string());
 
-                // Emetti sempre l'evento on_char_typed
                 if let Some(callback) = on_char_typed {
                     callback.run(());
                 }
 
-                // --- LOGICA DI CONTEGGIO PAROLE RIVISTA E CORRETTA ---
-
-                // L'indice del carattere appena processato è `s.current_index - 1`.
-                // Dobbiamo assicurarci che l'indice sia valido.
                 if s.current_index > 0 {
                     let processed_char_index = s.current_index - 1;
-
-                    // Prendiamo il carattere dal testo originale di riferimento
                     let text_char = s.text.chars().nth(processed_char_index).unwrap();
-
-                    // Prendiamo lo stato del carattere appena digitato
                     let char_status = &s.char_statuses[processed_char_index];
 
-                    // CONDIZIONE CHIAVE:
-                    // Incrementa il contatore delle parole solo se il carattere nel testo
-                    // era uno spazio E l'utente lo ha digitato correttamente.
                     if text_char == ' ' && *char_status == CharStatus::Correct {
                         if let Some(callback) = on_word_typed {
                             callback.run(());
@@ -185,18 +167,13 @@ pub fn TypingEngine(
                     }
                 }
 
-                // --- GESTIONE COMPLETAMENTO FRASE ---
                 if s.is_complete {
-                    // Se la frase è finita, dobbiamo contare l'ultima parola
-                    // solo se la frase NON termina con uno spazio (altrimenti
-                    // sarebbe già stata contata dalla logica qui sopra).
                     if !s.text.ends_with(' ') {
                         if let Some(callback) = on_word_typed {
                             callback.run(());
                         }
                     }
 
-                    // Emetti l'evento on_complete
                     if let Some(callback) = on_complete {
                         if let Some(wpm) = s.get_wpm() {
                             let accuracy = s.get_accuracy();
@@ -206,7 +183,6 @@ pub fn TypingEngine(
                 }
             });
 
-            // Svuota sempre l'input dopo averlo processato
             input.set_value("");
         }
     };
@@ -215,15 +191,11 @@ pub fn TypingEngine(
         if ev.key() == "Backspace" {
             ev.prevent_default();
             set_state.update(|s| {
-                // --- NUOVA LOGICA PER DECREMENTARE IL CONTEGGIO ---
-                // Prima di eseguire il backspace, controlliamo cosa stiamo per cancellare.
                 if s.current_index > 0 {
                     let index_to_delete = s.current_index - 1;
                     let char_to_delete = s.text.chars().nth(index_to_delete).unwrap();
                     let status_of_char = &s.char_statuses[index_to_delete];
 
-                    // Se stiamo cancellando uno SPAZIO che era stato digitato CORRETTAMENTE,
-                    // significa che stiamo "disfacendo" il completamento di una parola.
                     if char_to_delete == ' ' && *status_of_char == CharStatus::Correct {
                         if let Some(callback) = on_word_deleted {
                             callback.run(());
@@ -231,7 +203,6 @@ pub fn TypingEngine(
                     }
                 }
 
-                // Ora eseguiamo l'azione di backspace vera e propria
                 s.handle_backspace();
             });
         }
@@ -265,24 +236,58 @@ pub fn TypingEngine(
                     {move || {
                         let s = state.get();
                         let chars: Vec<char> = s.text.chars().collect();
-                        chars.into_iter().enumerate().map(|(i, ch)| {
-                            let status = &s.char_statuses[i];
-                            let is_current = i == s.current_index;
 
-                            let mut class = match status {
-                                CharStatus::Pending => "typing-char typing-char--pending",
-                                CharStatus::Correct => "typing-char typing-char--correct",
-                                CharStatus::Incorrect => "typing-char typing-char--incorrect",
+                        // Raggruppa i caratteri in parole
+                        let mut words = Vec::new();
+                        let mut current_word_chars = Vec::new();
+                        let mut char_index = 0;
+
+                        for ch in chars.iter() {
+                            if *ch == ' ' {
+                                // Aggiungi la parola corrente se non vuota
+                                if !current_word_chars.is_empty() {
+                                    words.push((current_word_chars.clone(), false));
+                                    current_word_chars.clear();
+                                }
+                                // Aggiungi lo spazio come "parola" separata
+                                words.push((vec![(char_index, ' ')], true));
+                                char_index += 1;
+                            } else {
+                                current_word_chars.push((char_index, *ch));
+                                char_index += 1;
                             }
-                            .to_string();
+                        }
 
-                            if is_current {
-                                class.push_str(" typing-char--current");
+                        // Aggiungi l'ultima parola se esiste
+                        if !current_word_chars.is_empty() {
+                            words.push((current_word_chars, false));
+                        }
+
+                        // Renderizza le parole
+                        words.into_iter().map(|(word_chars, _)| {
+                            view! {
+                                <span class="typing-word">
+                                    {word_chars.into_iter().map(|(i, ch)| {
+                                        let status = &s.char_statuses[i];
+                                        let is_current = i == s.current_index;
+
+                                        let mut class = match status {
+                                            CharStatus::Pending => "typing-char typing-char--pending",
+                                            CharStatus::Correct => "typing-char typing-char--correct",
+                                            CharStatus::Incorrect => "typing-char typing-char--incorrect",
+                                        }
+                                        .to_string();
+
+                                        if is_current {
+                                            class.push_str(" typing-char--current");
+                                        }
+
+                                        let ch_display = if ch == ' ' { '\u{00A0}' } else { ch };
+
+                                        view! { <span class=class>{ch_display}</span> }
+                                    }).collect_view()}
+                                </span>
                             }
-
-                            let ch_display = if ch == ' ' { '\u{00A0}' } else { ch };
-
-                            view! { <span class=class>{ch_display}</span> }
                         }).collect_view()
                     }}
                 </div>

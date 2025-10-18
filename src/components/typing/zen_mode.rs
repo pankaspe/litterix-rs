@@ -2,20 +2,40 @@
 //
 use crate::components::typing::{MetricsBar, TypingEngine};
 use leptos::prelude::*;
+use rand::rngs::OsRng;
+use rand::seq::SliceRandom;
+use serde::Deserialize;
 
-const ZEN_PHRASES: &[&str] = &[
-    "la velocità è nulla senza il controllo",
-    "ogni errore è un maestro che insegna pazienza",
-    "il ritmo della tastiera diventa musica per le dita",
-    "rust e webassembly creano magia nel browser",
-    "la precisione batte sempre la fretta",
-    "digitare senza guardare è come volare senza ali",
-    "il codice pulito nasce da dita sicure",
-    "la tastiera è uno strumento musicale per programmatori",
-];
+// Struttura semplificata per deserializzare il JSON
+#[derive(Deserialize)]
+struct PhrasesData {
+    phrases: Vec<String>,
+}
+
+// Carica le frasi dal file JSON
+fn load_phrases() -> Vec<String> {
+    let json_data = include_str!("../../../assets/datasets/base-dataset.json");
+    let data: PhrasesData =
+        serde_json::from_str(json_data).expect("Errore nel parsing del file base-dataset.json");
+    data.phrases
+}
+
+// Mescola le frasi in ordine casuale
+fn shuffle_phrases(phrases: &[String]) -> Vec<String> {
+    let mut shuffled = phrases.to_vec();
+    shuffled.shuffle(&mut OsRng);
+    shuffled
+}
 
 #[component]
 pub fn ZenMode() -> impl IntoView {
+    // Carica le frasi base all'avvio del componente
+    let base_phrases = StoredValue::new(load_phrases());
+
+    // Signal per le frasi mescolate
+    let (shuffled_phrases, set_shuffled_phrases) =
+        signal(shuffle_phrases(&base_phrases.get_value()));
+
     let (phrase_index, set_phrase_index) = signal(0_usize);
     let (last_wpm, set_last_wpm) = signal(0.0);
     let (last_accuracy, set_last_accuracy) = signal(100.0);
@@ -24,7 +44,10 @@ pub fn ZenMode() -> impl IntoView {
     let (is_transitioning, set_is_transitioning) = signal(false);
 
     // Genera la frase corrente in anticipo
-    let current_phrase = Memo::new(move |_| ZEN_PHRASES[phrase_index.get()].to_string());
+    let current_phrase = Memo::new(move |_| {
+        let phrases = shuffled_phrases.get();
+        phrases[phrase_index.get() % phrases.len()].clone()
+    });
 
     let on_complete = Callback::new(move |(wpm, accuracy): (f64, f64)| {
         set_last_wpm.set(wpm);
@@ -35,13 +58,18 @@ pub fn ZenMode() -> impl IntoView {
         set_timeout(
             move || {
                 set_phrase_index.update(|i| {
-                    *i = (*i + 1) % ZEN_PHRASES.len();
+                    *i += 1;
+                    // Quando finiscono tutte le frasi, rimescola
+                    if *i >= shuffled_phrases.get().len() {
+                        set_shuffled_phrases.set(shuffle_phrases(&base_phrases.get_value()));
+                        *i = 0;
+                    }
                 });
                 set_chars_typed.set(0); // Reset contatore caratteri
                 set_words_typed.set(0); // Reset contatore parole
                 set_is_transitioning.set(false);
             },
-            std::time::Duration::from_millis(800),
+            std::time::Duration::from_millis(400),
         );
     });
 
@@ -84,22 +112,24 @@ pub fn ZenMode() -> impl IntoView {
             />
 
             {move || {
-                // Non mostrare nulla durante la transizione
                 if is_transitioning.get() {
                     view! {
-                        <div class="typing-display" style="min-height: 200px; opacity: 0.3;">
-                            <div class="typing-text">"Caricamento prossima frase..."</div>
+                        <div class="zen-transition zen-transition--fading">
+                            <div class="typing-display" style="min-height: 200px;">
+                            </div>
                         </div>
                     }.into_any()
                 } else {
                     view! {
-                        <TypingEngine
-                            text=current_phrase.get()
-                            on_complete=on_complete
-                            on_char_typed=on_char_typed
-                            on_word_typed=on_word_typed
-                            on_word_deleted=on_word_deleted
-                        />
+                        <div class="zen-transition">
+                            <TypingEngine
+                                text=current_phrase.get()
+                                on_complete=on_complete
+                                on_char_typed=on_char_typed
+                                on_word_typed=on_word_typed
+                                on_word_deleted=on_word_deleted
+                            />
+                        </div>
                     }.into_any()
                 }
             }}
