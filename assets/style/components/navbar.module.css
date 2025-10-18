@@ -106,3 +106,21 @@
     width: 18px;
     height: 18px;
 }
+
+.navbar__login-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.navbar__login-btn.navbar__link--active {
+    color: var(--color-primary);
+}
+
+.navbar__login-btn.navbar__link--active svg {
+    color: var(--color-primary);
+}
+
+.navbar__login-icon svg {
+    width: 18px;
+    height: 18px;
+}

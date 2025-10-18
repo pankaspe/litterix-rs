@@ -6,8 +6,9 @@ edition = "2024"
 [dependencies]
 leptos = { version = "0.8.10", features = ["csr"] }
 leptos_router = "0.8.8"
-web-sys = { version = "0.3", features = ["Window", "Performance"] }
+web-sys = { version = "0.3", features = ["Window", "Performance", "Storage"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = { version = "0.8", features = ["getrandom"] }
 getrandom = { version = "0.2", features = ["js"] }
+wasm-bindgen = "0.2"
