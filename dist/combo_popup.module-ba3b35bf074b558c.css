@@ -2,9 +2,9 @@
 
 .combo-popup {
     position: fixed;
-    top: 30%;
+    top: 50%; /* Centrato verticalmente nella viewport */
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translate(-50%, -180px) scale(0.8); /* Offset verso l'alto rispetto al centro */
     z-index: 1000;
 
     opacity: 0;
@@ -15,7 +15,7 @@
 
 .combo-popup--visible {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -150px) scale(1);
 }
 
 .combo-popup__content {
@@ -116,7 +116,7 @@
 /* Effetto di fade out quando scompare */
 .combo-popup:not(.combo-popup--visible) {
     opacity: 0;
-    transform: translate(-50%, -60%) scale(0.9);
+    transform: translate(-50%, -200px) scale(0.9);
 }
 
 /* Stile speciale per la stat del combo nel game over */
@@ -132,7 +132,15 @@
 
 @media (max-width: 768px) {
     .combo-popup {
-        top: 25%;
+        transform: translate(-50%, -150px) scale(0.8);
+    }
+
+    .combo-popup--visible {
+        transform: translate(-50%, -150px) scale(1);
+    }
+
+    .combo-popup:not(.combo-popup--visible) {
+        transform: translate(-50%, -170px) scale(0.9);
     }
 
     .combo-popup__content {
