@@ -6,4 +6,4 @@ pub mod typing;
 
 pub use game::Game;
 pub use navbar::Navbar;
-pub use typing::{RushMode, ZenMode};
+pub use typing::{MarathonMode, RushMode, ZenMode};

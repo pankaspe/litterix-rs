@@ -1,4 +1,6 @@
-use crate::components::{RushMode, ZenMode};
+// src/components/game.rs
+//
+use crate::components::{MarathonMode, RushMode, ZenMode};
 use leptos::prelude::*;
 use web_sys::window;
 
@@ -7,32 +9,31 @@ use web_sys::window;
 enum GameMode {
     Zen,
     Rush,
+    Marathon,
 }
 
 #[component]
 pub fn Game() -> impl IntoView {
-    // Leggiamo il frammento (#) dall'URL per impostare lo stato iniziale.
-    // Questo permette di condividere link diretti a una modalità specifica.
+    // Leggiamo il frammento (#) dall'URL per impostare lo stato iniziale
     let get_initial_mode = || {
         if let Some(win) = window() {
             if let Ok(hash) = win.location().hash() {
                 return match hash.as_str() {
                     "#rush" => GameMode::Rush,
-                    _ => GameMode::Zen, // Default su Zen se l'hash è #zen o sconosciuto
+                    "#marathon" => GameMode::Marathon,
+                    _ => GameMode::Zen,
                 };
             }
         }
-        GameMode::Zen // Fallback se non siamo in un browser
+        GameMode::Zen
     };
 
-    // Creiamo un signal per tenere traccia della modalità attiva
     let (active_mode, set_active_mode) = signal(get_initial_mode());
 
     view! {
         <div class="game-container">
-            // --- Selettore a Tab ---
             <div class="game-tabs">
-                <div class="game-tabs__inner-wrapper"> // Usiamo la nuova classe per lo sfondo
+                <div class="game-tabs__inner-wrapper">
                     <a
                         href="#zen"
                         class="game-tab"
@@ -49,15 +50,22 @@ pub fn Game() -> impl IntoView {
                     >
                         "Rush Mode"
                     </a>
+                    <a
+                        href="#marathon"
+                        class="game-tab"
+                        class:active=move || active_mode.get() == GameMode::Marathon
+                        on:click=move |_| set_active_mode.set(GameMode::Marathon)
+                    >
+                        "Marathon"
+                    </a>
                 </div>
             </div>
 
-            // --- Area di Gioco ---
-            // Renderizza il componente corretto in base allo stato del signal
             <div class="game-content">
                 {move || match active_mode.get() {
                     GameMode::Zen => view! { <ZenMode /> }.into_any(),
                     GameMode::Rush => view! { <RushMode /> }.into_any(),
+                    GameMode::Marathon => view! { <MarathonMode /> }.into_any(),
                 }}
             </div>
         </div>
