@@ -1,6 +1,6 @@
-// src/components/typing/rush_mode.rs
+// src/components/typing/rush_mode.rs (AGGIORNATO)
 //
-use crate::components::typing::{MetricsBar, TypingEngine};
+use crate::components::typing::{ComboPopup, MetricsBar, TypingEngine, combo_popup::ComboType};
 use crate::settings_store::use_settings;
 use leptos::prelude::*;
 use rand::rngs::OsRng;
@@ -42,7 +42,6 @@ enum GameState {
 pub fn RushMode() -> impl IntoView {
     let settings_ctx = use_settings();
 
-    // Carica le frasi in base alle impostazioni
     let base_phrases = Memo::new(move |_| {
         let difficulty = settings_ctx.get_difficulty();
         let json_content = difficulty.get_dataset_content();
@@ -61,7 +60,12 @@ pub fn RushMode() -> impl IntoView {
     let (wpm_sum, set_wpm_sum) = signal(0.0);
     let (phrases_completed, set_phrases_completed) = signal(0_usize);
 
-    // Inizializza le frasi all'avvio e quando cambiano le impostazioni
+    // Sistema combo aggiornato
+    let (consecutive_correct_words, set_consecutive_correct_words) = signal(0_usize);
+    let (combo_trigger, set_combo_trigger) = signal::<Option<ComboType>>(None);
+    let (phrase_has_errors, set_phrase_has_errors) = signal(false);
+    let (last_combo_milestone, set_last_combo_milestone) = signal(0_usize);
+
     Effect::new(move |_| {
         let phrases = base_phrases.get();
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
@@ -92,8 +96,59 @@ pub fn RushMode() -> impl IntoView {
         set_total_chars_typed.update(|c| *c += 1);
     });
 
+    // Callback per carattere errato
+    let on_char_error = Callback::new(move |_: ()| {
+        let current_combo = consecutive_correct_words.get();
+        if current_combo >= 5 {
+            set_combo_trigger.set(Some(ComboType::ComboBroken));
+        }
+        set_consecutive_correct_words.set(0);
+        set_phrase_has_errors.set(true);
+        set_last_combo_milestone.set(0);
+    });
+
     let on_word_typed = Callback::new(move |_: ()| {
         set_total_words_typed.update(|w| *w += 1);
+
+        // Incrementa il contatore di parole consecutive corrette
+        set_consecutive_correct_words.update(|count| {
+            *count += 1;
+            let current = *count;
+            let last_milestone = last_combo_milestone.get();
+
+            // Logica milestone: trigger solo quando si supera un nuovo traguardo
+            let should_trigger = match current {
+                5 => last_milestone < 5,
+                10 => last_milestone < 10,
+                15 => last_milestone < 15,
+                20 => last_milestone < 20,
+                40 => last_milestone < 40,
+                80 => last_milestone < 80,
+                160 => last_milestone < 160,
+                320 => last_milestone < 320,
+                640 => last_milestone < 640,
+                1000 => last_milestone < 1000,
+                _ => false,
+            };
+
+            if should_trigger {
+                set_last_combo_milestone.set(current);
+
+                match current {
+                    5 => set_combo_trigger.set(Some(ComboType::Streak5)),
+                    10 => set_combo_trigger.set(Some(ComboType::Streak10)),
+                    15 => set_combo_trigger.set(Some(ComboType::Streak15)),
+                    20 => set_combo_trigger.set(Some(ComboType::Streak20)),
+                    40 => set_combo_trigger.set(Some(ComboType::Streak40)),
+                    80 => set_combo_trigger.set(Some(ComboType::Streak80)),
+                    160 => set_combo_trigger.set(Some(ComboType::Streak160)),
+                    320 => set_combo_trigger.set(Some(ComboType::Streak320)),
+                    640 => set_combo_trigger.set(Some(ComboType::Streak640)),
+                    1000 => set_combo_trigger.set(Some(ComboType::Streak1000)),
+                    _ => {}
+                }
+            }
+        });
     });
 
     let on_word_deleted = Callback::new(move |_: ()| {
@@ -102,6 +157,14 @@ pub fn RushMode() -> impl IntoView {
                 *w -= 1;
             }
         });
+        // Cancellare conta come errore
+        let current_combo = consecutive_correct_words.get();
+        if current_combo >= 5 {
+            set_combo_trigger.set(Some(ComboType::ComboBroken));
+        }
+        set_consecutive_correct_words.set(0);
+        set_phrase_has_errors.set(true);
+        set_last_combo_milestone.set(0);
     });
 
     let on_complete = Callback::new(move |(wpm, accuracy): (f64, f64)| {
@@ -110,6 +173,11 @@ pub fn RushMode() -> impl IntoView {
         set_accuracy_sum.update(|sum| *sum += accuracy);
         set_wpm_sum.update(|sum| *sum += wpm);
         set_phrases_completed.update(|count| *count += 1);
+
+        // Bonus per frase perfetta
+        if !phrase_has_errors.get() {
+            set_combo_trigger.set(Some(ComboType::PerfectPhrase));
+        }
 
         let time_bonus = match accuracy {
             a if a == 100.0 => ACCURACY_BONUS_PERFECT,
@@ -120,6 +188,8 @@ pub fn RushMode() -> impl IntoView {
         };
         set_time_remaining.update(|t| *t += time_bonus);
         set_phrase_index.update(|i| *i += 1);
+        // NON resettiamo consecutive_correct_words! Continua tra le frasi
+        set_phrase_has_errors.set(false);
     });
 
     let restart_game = move |_| {
@@ -133,6 +203,9 @@ pub fn RushMode() -> impl IntoView {
         set_accuracy_sum.set(0.0);
         set_wpm_sum.set(0.0);
         set_phrases_completed.set(0);
+        set_consecutive_correct_words.set(0);
+        set_phrase_has_errors.set(false);
+        set_last_combo_milestone.set(0);
 
         let phrases = base_phrases.get();
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
@@ -140,6 +213,8 @@ pub fn RushMode() -> impl IntoView {
 
     view! {
         <div class="rush-mode">
+            <ComboPopup trigger=Signal::derive(move || combo_trigger.get()) />
+
             <div class="rush-header">
                 <span class="rush-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge-icon lucide-gauge"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
@@ -226,6 +301,7 @@ pub fn RushMode() -> impl IntoView {
                                     text=current_text
                                     on_complete=on_complete
                                     on_char_typed=on_char_typed
+                                    on_char_error=on_char_error
                                     on_word_typed=on_word_typed
                                     on_word_deleted=on_word_deleted
                                 />

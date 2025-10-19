@@ -1,4 +1,4 @@
-// src/components/typing/engine.rs
+// src/components/typing/engine.rs (AGGIORNATO)
 //
 use leptos::ev::KeyboardEvent;
 use leptos::html::Input;
@@ -37,9 +37,10 @@ impl TypingState {
         }
     }
 
+    // Ritorna true se il carattere è corretto, false se è sbagliato
     pub fn handle_key(&mut self, key: &str) -> bool {
         if self.is_complete {
-            return false;
+            return true;
         }
 
         if !self.started {
@@ -54,13 +55,15 @@ impl TypingState {
         let chars: Vec<char> = self.text.chars().collect();
 
         if self.current_index >= chars.len() {
-            return false;
+            return true;
         }
 
         let expected_char = chars[self.current_index];
         let input_char = key.chars().next().unwrap_or('\0');
 
-        if input_char == expected_char {
+        let is_correct = input_char == expected_char;
+
+        if is_correct {
             self.char_statuses[self.current_index] = CharStatus::Correct;
         } else {
             self.char_statuses[self.current_index] = CharStatus::Incorrect;
@@ -77,7 +80,7 @@ impl TypingState {
             }
         }
 
-        true
+        is_correct
     }
 
     pub fn handle_backspace(&mut self) -> bool {
@@ -120,6 +123,7 @@ pub fn TypingEngine(
     text: String,
     #[prop(optional)] on_complete: Option<Callback<(f64, f64)>>,
     #[prop(optional)] on_char_typed: Option<Callback<()>>,
+    #[prop(optional)] on_char_error: Option<Callback<()>>,
     #[prop(optional)] on_word_typed: Option<Callback<()>>,
     #[prop(optional)] on_word_deleted: Option<Callback<()>>,
 ) -> impl IntoView {
@@ -149,10 +153,17 @@ pub fn TypingEngine(
                     return;
                 }
 
-                s.handle_key(&last_char.to_string());
+                let is_correct = s.handle_key(&last_char.to_string());
 
                 if let Some(callback) = on_char_typed {
                     callback.run(());
+                }
+
+                // Nuovo: notifica se il carattere è sbagliato
+                if !is_correct {
+                    if let Some(callback) = on_char_error {
+                        callback.run(());
+                    }
                 }
 
                 if s.current_index > 0 {
@@ -237,19 +248,16 @@ pub fn TypingEngine(
                         let s = state.get();
                         let chars: Vec<char> = s.text.chars().collect();
 
-                        // Raggruppa i caratteri in parole
                         let mut words = Vec::new();
                         let mut current_word_chars = Vec::new();
                         let mut char_index = 0;
 
                         for ch in chars.iter() {
                             if *ch == ' ' {
-                                // Aggiungi la parola corrente se non vuota
                                 if !current_word_chars.is_empty() {
                                     words.push((current_word_chars.clone(), false));
                                     current_word_chars.clear();
                                 }
-                                // Aggiungi lo spazio come "parola" separata
                                 words.push((vec![(char_index, ' ')], true));
                                 char_index += 1;
                             } else {
@@ -258,12 +266,10 @@ pub fn TypingEngine(
                             }
                         }
 
-                        // Aggiungi l'ultima parola se esiste
                         if !current_word_chars.is_empty() {
                             words.push((current_word_chars, false));
                         }
 
-                        // Renderizza le parole
                         words.into_iter().map(|(word_chars, _)| {
                             view! {
                                 <span class="typing-word">
