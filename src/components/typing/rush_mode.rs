@@ -38,6 +38,23 @@ enum GameState {
     Finished,
 }
 
+// Helper per ottenere il badge combo in base al punteggio
+fn get_combo_badge(combo: usize) -> (&'static str, &'static str) {
+    match combo {
+        0..=4 => ("", "Nessun Combo"),
+        5..=9 => ("🔥", "Combo"),
+        10..=14 => ("⚡", "Combo"),
+        15..=19 => ("💫", "Combo"),
+        20..=39 => ("🌟", "Grande Combo"),
+        40..=79 => ("💥", "Mega Combo"),
+        80..=159 => ("🚀", "Mega Combo"),
+        160..=319 => ("⭐", "Ultra Combo"),
+        320..=639 => ("👑", "Legendary"),
+        640..=999 => ("🔱", "Godlike"),
+        _ => ("🏆", "Unstoppable"),
+    }
+}
+
 #[component]
 pub fn RushMode() -> impl IntoView {
     let settings_ctx = use_settings();
@@ -65,6 +82,7 @@ pub fn RushMode() -> impl IntoView {
     let (combo_trigger, set_combo_trigger) = signal::<Option<ComboType>>(None);
     let (phrase_has_errors, set_phrase_has_errors) = signal(false);
     let (last_combo_milestone, set_last_combo_milestone) = signal(0_usize);
+    let (highest_combo, set_highest_combo) = signal(0_usize); // Nuovo: record combo
 
     Effect::new(move |_| {
         let phrases = base_phrases.get();
@@ -114,6 +132,12 @@ pub fn RushMode() -> impl IntoView {
         set_consecutive_correct_words.update(|count| {
             *count += 1;
             let current = *count;
+
+            // Aggiorna il record se superiamo il massimo
+            if current > highest_combo.get() {
+                set_highest_combo.set(current);
+            }
+
             let last_milestone = last_combo_milestone.get();
 
             // Logica milestone: trigger solo quando si supera un nuovo traguardo
@@ -206,6 +230,7 @@ pub fn RushMode() -> impl IntoView {
         set_consecutive_correct_words.set(0);
         set_phrase_has_errors.set(false);
         set_last_combo_milestone.set(0);
+        set_highest_combo.set(0); // Reset anche il record combo
 
         let phrases = base_phrases.get();
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
@@ -248,6 +273,16 @@ pub fn RushMode() -> impl IntoView {
                             <div class="rush-stat-item">
                                 <span class="rush-stat-label">"Frasi Completate"</span>
                                 <span class="rush-stat-value">{phrase_index.get()}</span>
+                            </div>
+                            <div class="rush-stat-item rush-stat-item--combo">
+                                <span class="rush-stat-label">"Combo Massima"</span>
+                                <span class="rush-stat-value rush-stat-value--combo">
+                                    {move || {
+                                        let combo = highest_combo.get();
+                                        let (emoji, _label) = get_combo_badge(combo);
+                                        format!("{} {}", emoji, combo)
+                                    }}
+                                </span>
                             </div>
                             <div class="rush-stat-item">
                                 <span class="rush-stat-label">"WPM Medio"</span>

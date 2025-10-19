@@ -119,6 +119,17 @@
     transform: translate(-50%, -60%) scale(0.9);
 }
 
+/* Stile speciale per la stat del combo nel game over */
+.rush-stat-item--combo {
+    border-left-color: var(--color-primary) !important;
+    background: rgba(from var(--color-primary) r g b / 0.05);
+}
+
+.rush-stat-value--combo {
+    color: var(--color-primary) !important;
+    font-size: 1.8rem !important;
+}
+
 @media (max-width: 768px) {
     .combo-popup {
         top: 25%;
@@ -135,5 +146,9 @@
     .combo-popup__content:has-text("UNSTOPPABLE") {
         font-size: 1.2rem;
         padding: 1rem 2rem;
+    }
+
+    .rush-stat-value--combo {
+        font-size: 1.5rem !important;
     }
 }
