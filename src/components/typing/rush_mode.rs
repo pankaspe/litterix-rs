@@ -1,7 +1,8 @@
-// src/components/typing/rush_mode.rs (AGGIORNATO)
+// src/components/typing/rush_mode.rs
 //
-use crate::components::typing::{ComboPopup, MetricsBar, TypingEngine, combo_popup::ComboType};
+use crate::components::typing::{ComboPopup, ComboType, MetricsBar, TypingEngine};
 use crate::settings_store::use_settings;
+use crate::stats_store::{GameMode as StatsGameMode, use_stats};
 use leptos::prelude::*;
 use rand::rngs::OsRng;
 use rand::seq::SliceRandom;
@@ -58,6 +59,7 @@ fn get_combo_badge(combo: usize) -> (&'static str, &'static str) {
 #[component]
 pub fn RushMode() -> impl IntoView {
     let settings_ctx = use_settings();
+    let stats_ctx = use_stats();
 
     let base_phrases = Memo::new(move |_| {
         let difficulty = settings_ctx.get_difficulty();
@@ -69,52 +71,85 @@ pub fn RushMode() -> impl IntoView {
     let (game_state, set_game_state) = signal(GameState::Pending);
     let (phrase_index, set_phrase_index) = signal(0_usize);
     let (time_remaining, set_time_remaining) = signal(INITIAL_TIME);
-    let (total_words_typed, set_total_words_typed) = signal(0_usize);
-    let (total_chars_typed, set_total_chars_typed) = signal(0_usize);
+    let (total_words_typed, set_total_words_typed) = signal(0_u32);
+    let (total_chars_typed, set_total_chars_typed) = signal(0_u32);
     let (last_wpm, set_last_wpm) = signal(0.0);
     let (last_accuracy, set_last_accuracy) = signal(100.0);
     let (accuracy_sum, set_accuracy_sum) = signal(0.0);
     let (wpm_sum, set_wpm_sum) = signal(0.0);
-    let (phrases_completed, set_phrases_completed) = signal(0_usize);
+    let (phrases_completed, set_phrases_completed) = signal(0_u32);
+    let (_game_start_time, set_game_start_time) = signal(0.0);
 
     // Sistema combo aggiornato
     let (consecutive_correct_words, set_consecutive_correct_words) = signal(0_usize);
     let (combo_trigger, set_combo_trigger) = signal::<Option<ComboType>>(None);
     let (phrase_has_errors, set_phrase_has_errors) = signal(false);
     let (last_combo_milestone, set_last_combo_milestone) = signal(0_usize);
-    let (highest_combo, set_highest_combo) = signal(0_usize); // Nuovo: record combo
+    let (highest_combo, set_highest_combo) = signal(0_usize);
 
     Effect::new(move |_| {
         let phrases = base_phrases.get();
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
     });
 
-    Effect::new(move |_| {
-        if game_state.get() == GameState::Running {
-            let handle = set_interval_with_handle(
-                move || {
-                    set_time_remaining.update(|t| *t -= 0.1);
-                    if time_remaining.get() <= 0.0 {
-                        set_time_remaining.set(0.0);
-                        set_game_state.set(GameState::Finished);
-                    }
-                },
-                Duration::from_millis(100),
-            )
-            .unwrap();
+    Effect::new({
+        let stats_ctx = stats_ctx;
+        move |_| {
+            if game_state.get() == GameState::Running {
+                let handle = set_interval_with_handle(
+                    move || {
+                        set_time_remaining.update(|t| *t -= 0.1);
+                        if time_remaining.get() <= 0.0 {
+                            set_time_remaining.set(0.0);
+                            set_game_state.set(GameState::Finished);
 
-            on_cleanup(move || handle.clear());
+                            // Registra le statistiche
+                            let time_played = INITIAL_TIME - time_remaining.get();
+                            let words = total_words_typed.get();
+                            let chars = total_chars_typed.get();
+                            let combo = highest_combo.get();
+
+                            let avg_wpm = if phrases_completed.get() > 0 {
+                                wpm_sum.get() / phrases_completed.get() as f64
+                            } else {
+                                0.0
+                            };
+
+                            let avg_accuracy = if phrases_completed.get() > 0 {
+                                accuracy_sum.get() / phrases_completed.get() as f64
+                            } else {
+                                100.0
+                            };
+
+                            stats_ctx.record_game(
+                                StatsGameMode::Rush,
+                                words,
+                                chars,
+                                time_played,
+                                avg_wpm,
+                                avg_accuracy,
+                                combo,
+                                None,
+                            );
+                        }
+                    },
+                    Duration::from_millis(100),
+                )
+                .unwrap();
+
+                on_cleanup(move || handle.clear());
+            }
         }
     });
 
     let on_char_typed = Callback::new(move |_: ()| {
         if game_state.get() == GameState::Pending {
             set_game_state.set(GameState::Running);
+            set_game_start_time.set(INITIAL_TIME);
         }
         set_total_chars_typed.update(|c| *c += 1);
     });
 
-    // Callback per carattere errato
     let on_char_error = Callback::new(move |_: ()| {
         let current_combo = consecutive_correct_words.get();
         if current_combo >= 5 {
@@ -128,19 +163,16 @@ pub fn RushMode() -> impl IntoView {
     let on_word_typed = Callback::new(move |_: ()| {
         set_total_words_typed.update(|w| *w += 1);
 
-        // Incrementa il contatore di parole consecutive corrette
         set_consecutive_correct_words.update(|count| {
             *count += 1;
             let current = *count;
 
-            // Aggiorna il record se superiamo il massimo
             if current > highest_combo.get() {
                 set_highest_combo.set(current);
             }
 
             let last_milestone = last_combo_milestone.get();
 
-            // Logica milestone: trigger solo quando si supera un nuovo traguardo
             let should_trigger = match current {
                 5 => last_milestone < 5,
                 10 => last_milestone < 10,
@@ -181,7 +213,6 @@ pub fn RushMode() -> impl IntoView {
                 *w -= 1;
             }
         });
-        // Cancellare conta come errore
         let current_combo = consecutive_correct_words.get();
         if current_combo >= 5 {
             set_combo_trigger.set(Some(ComboType::ComboBroken));
@@ -198,7 +229,6 @@ pub fn RushMode() -> impl IntoView {
         set_wpm_sum.update(|sum| *sum += wpm);
         set_phrases_completed.update(|count| *count += 1);
 
-        // Bonus per frase perfetta
         if !phrase_has_errors.get() {
             set_combo_trigger.set(Some(ComboType::PerfectPhrase));
         }
@@ -212,7 +242,6 @@ pub fn RushMode() -> impl IntoView {
         };
         set_time_remaining.update(|t| *t += time_bonus);
         set_phrase_index.update(|i| *i += 1);
-        // NON resettiamo consecutive_correct_words! Continua tra le frasi
         set_phrase_has_errors.set(false);
     });
 
@@ -230,7 +259,7 @@ pub fn RushMode() -> impl IntoView {
         set_consecutive_correct_words.set(0);
         set_phrase_has_errors.set(false);
         set_last_combo_milestone.set(0);
-        set_highest_combo.set(0); // Reset anche il record combo
+        set_highest_combo.set(0);
 
         let phrases = base_phrases.get();
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
@@ -253,8 +282,8 @@ pub fn RushMode() -> impl IntoView {
             <MetricsBar
                 wpm=Signal::derive(move || last_wpm.get())
                 accuracy=Signal::derive(move || last_accuracy.get())
-                chars_typed=Signal::derive(move || total_chars_typed.get())
-                words_typed=Signal::derive(move || total_words_typed.get())
+                chars_typed=Signal::derive(move || total_chars_typed.get() as usize)
+                words_typed=Signal::derive(move || total_words_typed.get() as usize)
                 timer=Signal::derive(move || time_remaining.get())
             />
 

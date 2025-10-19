@@ -1,11 +1,13 @@
-// src/components/typing/zen_mode.rs (AGGIORNATO)
+// src/components/typing/zen_mode.rs (AGGIORNATO con tracking stats)
 //
 use crate::components::typing::{ComboPopup, MetricsBar, TypingEngine, combo_popup::ComboType};
 use crate::settings_store::use_settings;
+use crate::stats_store::{GameMode as StatsGameMode, use_stats};
 use leptos::prelude::*;
 use rand::rngs::OsRng;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
+use web_sys::window;
 
 #[derive(Deserialize)]
 struct PhrasesData {
@@ -27,6 +29,7 @@ fn shuffle_phrases(phrases: &[String]) -> Vec<String> {
 #[component]
 pub fn ZenMode() -> impl IntoView {
     let settings_ctx = use_settings();
+    let stats_ctx = use_stats();
 
     let base_phrases = Memo::new(move |_| {
         let difficulty = settings_ctx.get_difficulty();
@@ -47,6 +50,16 @@ pub fn ZenMode() -> impl IntoView {
     let (combo_trigger, set_combo_trigger) = signal::<Option<ComboType>>(None);
     let (phrase_has_errors, set_phrase_has_errors) = signal(false);
     let (last_combo_milestone, set_last_combo_milestone) = signal(0_usize);
+    let (highest_combo, set_highest_combo) = signal(0_usize);
+
+    // Tracking sessione per stats
+    let (session_started, set_session_started) = signal(false);
+    let (session_start_time, set_session_start_time) = signal(0.0);
+    let (total_session_words, set_total_session_words) = signal(0_u32);
+    let (total_session_chars, set_total_session_chars) = signal(0_u32);
+    let (accuracy_sum, set_accuracy_sum) = signal(0.0);
+    let (wpm_sum, set_wpm_sum) = signal(0.0);
+    let (phrases_completed, set_phrases_completed) = signal(0_u32);
 
     Effect::new(move |_| {
         let phrases = base_phrases.get();
@@ -57,6 +70,13 @@ pub fn ZenMode() -> impl IntoView {
         set_consecutive_correct_words.set(0);
         set_phrase_has_errors.set(false);
         set_last_combo_milestone.set(0);
+        set_highest_combo.set(0);
+        set_session_started.set(false);
+        set_total_session_words.set(0);
+        set_total_session_chars.set(0);
+        set_accuracy_sum.set(0.0);
+        set_wpm_sum.set(0.0);
+        set_phrases_completed.set(0);
     });
 
     let current_phrase = Memo::new(move |_| {
@@ -82,6 +102,9 @@ pub fn ZenMode() -> impl IntoView {
     let on_complete = Callback::new(move |(wpm, accuracy): (f64, f64)| {
         set_last_wpm.set(wpm);
         set_last_accuracy.set(accuracy);
+        set_accuracy_sum.update(|sum| *sum += accuracy);
+        set_wpm_sum.update(|sum| *sum += wpm);
+        set_phrases_completed.update(|count| *count += 1);
 
         // Se la frase è stata completata senza errori
         if !phrase_has_errors.get() {
@@ -102,7 +125,6 @@ pub fn ZenMode() -> impl IntoView {
                 });
                 set_chars_typed.set(0);
                 set_words_typed.set(0);
-                // NON resettiamo consecutive_correct_words qui! Continua tra le frasi
                 set_phrase_has_errors.set(false);
                 set_is_transitioning.set(false);
             },
@@ -111,16 +133,33 @@ pub fn ZenMode() -> impl IntoView {
     });
 
     let on_char_typed = Callback::new(move |_: ()| {
+        // Inizia la sessione al primo carattere
+        if !session_started.get() {
+            set_session_started.set(true);
+            if let Some(win) = window() {
+                if let Some(perf) = win.performance() {
+                    set_session_start_time.set(perf.now());
+                }
+            }
+        }
+
         set_chars_typed.update(|c| *c += 1);
+        set_total_session_chars.update(|c| *c += 1);
     });
 
     let on_word_typed = Callback::new(move |_: ()| {
         set_words_typed.update(|w| *w += 1);
+        set_total_session_words.update(|w| *w += 1);
 
         // Incrementa il contatore di parole consecutive corrette
         set_consecutive_correct_words.update(|count| {
             *count += 1;
             let current = *count;
+
+            if current > highest_combo.get() {
+                set_highest_combo.set(current);
+            }
+
             let last_milestone = last_combo_milestone.get();
 
             // Logica milestone: trigger solo quando si supera un nuovo traguardo
@@ -164,6 +203,11 @@ pub fn ZenMode() -> impl IntoView {
                 *w -= 1;
             }
         });
+        set_total_session_words.update(|w| {
+            if *w > 0 {
+                *w -= 1;
+            }
+        });
         // Cancellare conta come errore
         let current_combo = consecutive_correct_words.get();
         if current_combo >= 5 {
@@ -173,6 +217,62 @@ pub fn ZenMode() -> impl IntoView {
         set_phrase_has_errors.set(true);
         set_last_combo_milestone.set(0);
     });
+
+    // Funzione per terminare la sessione e salvare le stats
+    let end_session = move |_| {
+        if !session_started.get() || phrases_completed.get() == 0 {
+            return;
+        }
+
+        let session_time = if let Some(win) = window() {
+            if let Some(perf) = win.performance() {
+                (perf.now() - session_start_time.get()) / 1000.0 // converti in secondi
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        };
+
+        let avg_wpm = if phrases_completed.get() > 0 {
+            wpm_sum.get() / phrases_completed.get() as f64
+        } else {
+            0.0
+        };
+
+        let avg_accuracy = if phrases_completed.get() > 0 {
+            accuracy_sum.get() / phrases_completed.get() as f64
+        } else {
+            100.0
+        };
+
+        stats_ctx.record_game(
+            StatsGameMode::Zen,
+            total_session_words.get(),
+            total_session_chars.get(),
+            session_time,
+            avg_wpm,
+            avg_accuracy,
+            highest_combo.get(),
+            None,
+        );
+
+        // Reset sessione
+        set_session_started.set(false);
+        set_total_session_words.set(0);
+        set_total_session_chars.set(0);
+        set_accuracy_sum.set(0.0);
+        set_wpm_sum.set(0.0);
+        set_phrases_completed.set(0);
+        set_highest_combo.set(0);
+        set_consecutive_correct_words.set(0);
+        set_last_combo_milestone.set(0);
+
+        // Ricarica le frasi
+        let phrases = base_phrases.get();
+        set_shuffled_phrases.set(shuffle_phrases(&phrases));
+        set_phrase_index.set(0);
+    };
 
     view! {
         <div class="zen-mode">
@@ -228,6 +328,30 @@ pub fn ZenMode() -> impl IntoView {
                     }
                 }
             }}
+
+
+            // Pulsante per terminare la sessione
+            <Show when=move || session_started.get()>
+                <div class="zen-session-controls">
+                    <button class="zen-end-session-button" on:click=end_session>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 9h6v6H9z"/>
+                            <path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0"/>
+                        </svg>
+                        "Termina Sessione e Salva"
+                    </button>
+                    <div class="zen-session-info">
+                        <span class="zen-session-stat">
+                            "Frasi completate: "
+                            <strong>{move || phrases_completed.get()}</strong>
+                        </span>
+                        <span class="zen-session-stat">
+                            "Parole totali: "
+                            <strong>{move || total_session_words.get()}</strong>
+                        </span>
+                    </div>
+                </div>
+            </Show>
         </div>
     }
 }

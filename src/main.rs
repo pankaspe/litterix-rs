@@ -6,6 +6,7 @@ mod app;
 mod components;
 mod pages;
 pub mod settings_store;
+pub mod stats_store;
 
 use app::App;
 

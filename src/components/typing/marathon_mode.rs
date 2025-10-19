@@ -2,6 +2,7 @@
 //
 use crate::components::typing::{ComboPopup, ComboType, MetricsBar, TypingEngine};
 use crate::settings_store::use_settings;
+use crate::stats_store::{GameMode as StatsGameMode, use_stats};
 use leptos::prelude::*;
 use rand::rngs::OsRng;
 use rand::seq::SliceRandom;
@@ -54,6 +55,7 @@ fn get_combo_badge(combo: usize) -> (&'static str, &'static str) {
 #[component]
 pub fn MarathonMode() -> impl IntoView {
     let settings_ctx = use_settings();
+    let stats_ctx = use_stats();
 
     let base_phrases = Memo::new(move |_| {
         let difficulty = settings_ctx.get_difficulty();
@@ -65,13 +67,13 @@ pub fn MarathonMode() -> impl IntoView {
     let (game_state, set_game_state) = signal(GameState::Pending);
     let (phrase_index, set_phrase_index) = signal(0_usize);
     let (time_remaining, set_time_remaining) = signal(MARATHON_TIME);
-    let (total_words_typed, set_total_words_typed) = signal(0_usize);
-    let (total_chars_typed, set_total_chars_typed) = signal(0_usize);
+    let (total_words_typed, set_total_words_typed) = signal(0_u32);
+    let (total_chars_typed, set_total_chars_typed) = signal(0_u32);
     let (last_wpm, set_last_wpm) = signal(0.0);
     let (last_accuracy, set_last_accuracy) = signal(100.0);
     let (accuracy_sum, set_accuracy_sum) = signal(0.0);
     let (wpm_sum, set_wpm_sum) = signal(0.0);
-    let (phrases_completed, set_phrases_completed) = signal(0_usize);
+    let (phrases_completed, set_phrases_completed) = signal(0_u32);
 
     // Sistema combo
     let (consecutive_correct_words, set_consecutive_correct_words) = signal(0_usize);
@@ -85,22 +87,54 @@ pub fn MarathonMode() -> impl IntoView {
         set_shuffled_phrases.set(shuffle_phrases(&phrases));
     });
 
-    // Timer countdown
-    Effect::new(move |_| {
-        if game_state.get() == GameState::Running {
-            let handle = set_interval_with_handle(
-                move || {
-                    set_time_remaining.update(|t| *t -= 0.1);
-                    if time_remaining.get() <= 0.0 {
-                        set_time_remaining.set(0.0);
-                        set_game_state.set(GameState::Finished);
-                    }
-                },
-                Duration::from_millis(100),
-            )
-            .unwrap();
+    // Timer countdown con registrazione stats
+    Effect::new({
+        let stats_ctx = stats_ctx;
+        move |_| {
+            if game_state.get() == GameState::Running {
+                let handle = set_interval_with_handle(
+                    move || {
+                        set_time_remaining.update(|t| *t -= 0.1);
+                        if time_remaining.get() <= 0.0 {
+                            set_time_remaining.set(0.0);
+                            set_game_state.set(GameState::Finished);
 
-            on_cleanup(move || handle.clear());
+                            // Registra le statistiche
+                            let words = total_words_typed.get();
+                            let chars = total_chars_typed.get();
+                            let combo = highest_combo.get();
+                            let score = words + (combo as u32 / 5);
+
+                            let avg_wpm = if phrases_completed.get() > 0 {
+                                wpm_sum.get() / phrases_completed.get() as f64
+                            } else {
+                                0.0
+                            };
+
+                            let avg_accuracy = if phrases_completed.get() > 0 {
+                                accuracy_sum.get() / phrases_completed.get() as f64
+                            } else {
+                                100.0
+                            };
+
+                            stats_ctx.record_game(
+                                StatsGameMode::Marathon,
+                                words,
+                                chars,
+                                MARATHON_TIME,
+                                avg_wpm,
+                                avg_accuracy,
+                                combo,
+                                Some(score),
+                            );
+                        }
+                    },
+                    Duration::from_millis(100),
+                )
+                .unwrap();
+
+                on_cleanup(move || handle.clear());
+            }
         }
     });
 
@@ -235,8 +269,8 @@ pub fn MarathonMode() -> impl IntoView {
             <MetricsBar
                 wpm=Signal::derive(move || last_wpm.get())
                 accuracy=Signal::derive(move || last_accuracy.get())
-                chars_typed=Signal::derive(move || total_chars_typed.get())
-                words_typed=Signal::derive(move || total_words_typed.get())
+                chars_typed=Signal::derive(move || total_chars_typed.get() as usize)
+                words_typed=Signal::derive(move || total_words_typed.get() as usize)
                 timer=Signal::derive(move || time_remaining.get())
             />
 
@@ -253,7 +287,7 @@ pub fn MarathonMode() -> impl IntoView {
                                 <span class="marathon-stat-value marathon-stat-value--score">
                                     {move || {
                                         let words = total_words_typed.get();
-                                        let combo_bonus = highest_combo.get() / 5;
+                                        let combo_bonus = highest_combo.get() as u32 / 5;
                                         let score = words + combo_bonus;
                                         format!("{}", score)
                                     }}
